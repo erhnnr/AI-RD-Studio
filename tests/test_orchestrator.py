@@ -13,6 +13,6 @@ def test_orchestrator_runs_full_flow():
 
     record = orchestrator.execute(signal)
 
-    assert record.title == "Research opportunity"
-    assert record.content == "Personal AI teachers are becoming important"
-    assert "runtime" in record.tags
+    assert record.title == "StrategyWorker"
+    assert record.content == "Strategic analysis completed"
+    assert "worker" in record.tags
