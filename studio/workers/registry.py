@@ -1,4 +1,4 @@
-from studio.workers.strategy_worker import StrategyWorker
+from studio.workers.strategy import StrategyWorker
 
 
 class WorkerRegistry:

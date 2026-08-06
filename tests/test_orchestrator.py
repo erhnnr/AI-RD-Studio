@@ -1,4 +1,4 @@
-from studio.core.models import Signal
+from studio.core.models import Signal, KnowledgeRecord
 from studio.runtime.orchestrator import StudioOrchestrator
 
 
@@ -13,6 +13,7 @@ def test_orchestrator_runs_full_flow():
 
     record = orchestrator.execute(signal)
 
-    assert record.title == "StrategyWorker"
-    assert record.content == "Strategic analysis completed"
-    assert "worker" in record.tags
+    assert isinstance(record, KnowledgeRecord)
+    assert record.title == "Research opportunity"
+    assert "AI education opportunity" in record.content
+    assert "strategy" in record.tags

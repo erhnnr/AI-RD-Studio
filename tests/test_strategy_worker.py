@@ -1,32 +1,32 @@
-from studio.workers.strategy_worker import StrategyWorker
 from studio.core.models import Signal, Opportunity
-from studio.runtime.task_manager import TaskManager
+from studio.workers.strategy import StrategyWorker
 
 
-def test_strategy_worker_executes_task():
+def test_strategy_worker_ai_signal():
     signal = Signal(
-        title="AI market",
-        description="AI systems are expanding",
-        source="research",
-    )
-
-    opportunity = Opportunity(
-        signal=signal,
-        impact=5,
-        urgency=5,
-        feasibility=5,
-        strategic_fit=5,
-    )
-
-    task = TaskManager().create_task(
-        opportunity,
-        "Analyze AI market opportunity",
+        title="AI Education",
+        description="Growing demand for AI tutors",
+        source="market",
     )
 
     worker = StrategyWorker()
 
-    result = worker.execute(task)
+    result = worker.execute(signal)
 
-    assert result["worker"] == "StrategyWorker"
-    assert result["task"] == "Analyze AI market opportunity"
-    assert result["analysis"] == "Strategic analysis completed"
+    assert isinstance(result, Opportunity)
+    assert result.score == 35
+
+
+def test_strategy_worker_normal_signal():
+    signal = Signal(
+        title="Local News",
+        description="General update",
+        source="news",
+    )
+
+    worker = StrategyWorker()
+
+    result = worker.execute(signal)
+
+    assert isinstance(result, Opportunity)
+    assert result.score == 20
