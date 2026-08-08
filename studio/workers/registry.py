@@ -4,7 +4,7 @@ from studio.workers.research_worker import ResearchWorker
 
 class WorkerRegistry:
     """
-    Stores available Studio workers.
+    Registry for Studio workers.
     """
 
     def __init__(self):
@@ -14,14 +14,20 @@ class WorkerRegistry:
         }
 
     def get(self, worker_name: str):
+        """
+        Return worker by registry name.
+        """
         return self.workers.get(worker_name)
 
     def find_by_capability(self, capability: str):
         """
-        Find first worker that supports capability.
+        Find worker matching a capability.
         """
 
         for worker in self.workers.values():
+
+            if worker is None:
+                continue
 
             if worker.has_capability(capability):
                 return worker
@@ -40,6 +46,9 @@ class WorkerRegistry:
         """
 
         for worker in self.workers.values():
+
+            if worker is None:
+                continue
 
             if not worker.has_capability(capability):
                 continue

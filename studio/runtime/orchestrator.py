@@ -1,5 +1,6 @@
 from studio.core.models import PipelineResult, Signal
 from studio.core.review_board import ReviewBoard
+from studio.runtime.runtime_guard import RuntimeGuard
 from studio.runtime.task_manager import TaskManager
 from studio.knowledge.writer import KnowledgeWriter
 from studio.workers.registry import WorkerRegistry
@@ -22,6 +23,8 @@ class StudioOrchestrator:
         Run the complete Studio pipeline and return all intermediate results.
         """
 
+        RuntimeGuard.validate_signal(signal)
+
         # -------------------------------------------------
         # 1. Research
         # -------------------------------------------------
@@ -39,12 +42,21 @@ class StudioOrchestrator:
                 "research"
             )
 
+        RuntimeGuard.require_worker(
+            research_worker,
+            "research",
+        )
+
         research_context = WorkerContext(
             signal=signal
         )
 
         research_result = research_worker.execute(
             research_context
+        )
+
+        RuntimeGuard.validate_research_result(
+            research_result
         )
 
         # -------------------------------------------------
@@ -64,8 +76,17 @@ class StudioOrchestrator:
                 "strategy"
             )
 
+        RuntimeGuard.require_worker(
+            strategy_worker,
+            "opportunity_scoring",
+        )
+
         opportunity = strategy_worker.execute(
             research_result
+        )
+
+        RuntimeGuard.validate_opportunity(
+            opportunity
         )
 
         # -------------------------------------------------
@@ -139,7 +160,10 @@ class StudioOrchestrator:
 
         return knowledge
 
-    def execute_with_trace(self, signal: Signal) -> PipelineResult:
+    def execute_with_trace(
+        self,
+        signal: Signal,
+    ) -> PipelineResult:
         """
         Execute the Studio pipeline and return the complete runtime trace.
         """
