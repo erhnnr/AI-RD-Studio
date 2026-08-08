@@ -1,6 +1,8 @@
 from studio.core.models import (
+    KnowledgeRecord,
     Opportunity,
     ResearchResult,
+    ResearchTask,
     Signal,
 )
 
@@ -74,4 +76,60 @@ class RuntimeGuard:
         if opportunity.signal is None:
             raise RuntimeValidationError(
                 "Opportunity must contain a Signal."
+            )
+
+    @staticmethod
+    def validate_decision(decision) -> None:
+
+        if decision is None:
+            raise RuntimeValidationError(
+                "ReviewBoard must return a decision."
+            )
+
+        required_attributes = (
+            "decision",
+            "reason",
+            "next_action",
+        )
+
+        for attribute in required_attributes:
+
+            if not hasattr(decision, attribute):
+                raise RuntimeValidationError(
+                    "ReviewBoard must return a valid decision object."
+                )
+
+        if not decision.decision:
+            raise RuntimeValidationError(
+                "Decision must contain a decision value."
+            )
+
+    @staticmethod
+    def validate_task(
+        task: ResearchTask,
+    ) -> None:
+
+        if not isinstance(task, ResearchTask):
+            raise RuntimeValidationError(
+                "TaskManager must return ResearchTask."
+            )
+
+        if task.opportunity is None:
+            raise RuntimeValidationError(
+                "ResearchTask must contain an Opportunity."
+            )
+
+    @staticmethod
+    def validate_knowledge(
+        knowledge: KnowledgeRecord,
+    ) -> None:
+
+        if not isinstance(knowledge, KnowledgeRecord):
+            raise RuntimeValidationError(
+                "KnowledgeWriter must return KnowledgeRecord."
+            )
+
+        if not knowledge.title:
+            raise RuntimeValidationError(
+                "KnowledgeRecord must contain a title."
             )

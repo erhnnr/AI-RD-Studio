@@ -97,6 +97,10 @@ class StudioOrchestrator:
             opportunity
         )
 
+        RuntimeGuard.validate_decision(
+            decision
+        )
+
         # -------------------------------------------------
         # 4. Task
         # -------------------------------------------------
@@ -108,6 +112,10 @@ class StudioOrchestrator:
             task = self.task_manager.create_task(
                 opportunity,
                 decision.next_action,
+            )
+
+            RuntimeGuard.validate_task(
+                task
             )
 
             content = (
@@ -135,6 +143,10 @@ class StudioOrchestrator:
                 "runtime",
                 "decision",
             ],
+        )
+
+        RuntimeGuard.validate_knowledge(
+            knowledge
         )
 
         return (
