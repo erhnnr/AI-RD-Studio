@@ -84,3 +84,18 @@ class DecisionRecord:
     confidence: int
     next_action: str
     created_at: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
+class PipelineResult:
+    """
+    Complete trace of a Studio runtime pipeline execution.
+    """
+
+    signal: Signal
+    research_result: ResearchResult
+    opportunity: Opportunity
+    decision: DecisionRecord
+    task: Optional[ResearchTask]
+    knowledge: KnowledgeRecord
+    created_at: datetime = field(default_factory=datetime.now)
