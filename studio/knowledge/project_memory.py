@@ -96,6 +96,66 @@ class ProjectMemoryStore:
 
         return memory.get(project_name)
 
+    def get_research_history(
+        self,
+        project_name: str,
+    ) -> list:
+        """
+        Return all persisted research records for a project.
+        """
+
+        project = self.get_project(
+            project_name
+        )
+
+        if project is None:
+            return []
+
+        return [
+            execution["research"]
+            for execution in project["executions"]
+        ]
+
+    def get_decision_history(
+        self,
+        project_name: str,
+    ) -> list:
+        """
+        Return all persisted decisions for a project.
+        """
+
+        project = self.get_project(
+            project_name
+        )
+
+        if project is None:
+            return []
+
+        return [
+            execution["decision"]
+            for execution in project["executions"]
+        ]
+
+    def get_knowledge_history(
+        self,
+        project_name: str,
+    ) -> list:
+        """
+        Return all persisted knowledge records for a project.
+        """
+
+        project = self.get_project(
+            project_name
+        )
+
+        if project is None:
+            return []
+
+        return [
+            execution["knowledge"]
+            for execution in project["executions"]
+        ]
+
     def all_projects(self) -> dict:
         """
         Return all persisted project memories.
