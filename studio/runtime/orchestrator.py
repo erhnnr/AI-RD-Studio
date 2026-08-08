@@ -1,4 +1,4 @@
-from studio.core.models import Signal
+from studio.core.models import PipelineResult, Signal
 from studio.core.review_board import ReviewBoard
 from studio.runtime.task_manager import TaskManager
 from studio.knowledge.writer import KnowledgeWriter
@@ -17,7 +17,10 @@ class StudioOrchestrator:
         self.worker_registry = WorkerRegistry()
         self.review_board = ReviewBoard()
 
-    def execute(self, signal: Signal):
+    def _run_pipeline(self, signal: Signal):
+        """
+        Run the complete Studio pipeline and return all intermediate results.
+        """
 
         # -------------------------------------------------
         # 1. Research
@@ -31,7 +34,6 @@ class StudioOrchestrator:
             )
         )
 
-        # Backward compatibility fallback
         if research_worker is None:
             research_worker = self.worker_registry.get(
                 "research"
@@ -57,7 +59,6 @@ class StudioOrchestrator:
             )
         )
 
-        # Backward compatibility fallback
         if strategy_worker is None:
             strategy_worker = self.worker_registry.get(
                 "strategy"
@@ -76,8 +77,10 @@ class StudioOrchestrator:
         )
 
         # -------------------------------------------------
-        # 4. Execution / Knowledge
+        # 4. Task
         # -------------------------------------------------
+
+        task = None
 
         if decision.decision == "ACCEPT":
 
@@ -100,11 +103,60 @@ class StudioOrchestrator:
                 f"Next action: {decision.next_action}"
             )
 
-        return self.knowledge_writer.write(
+        # -------------------------------------------------
+        # 5. Knowledge
+        # -------------------------------------------------
+
+        knowledge = self.knowledge_writer.write(
             title=f"Decision: {decision.decision}",
             content=content,
             tags=[
                 "runtime",
                 "decision",
             ],
+        )
+
+        return (
+            research_result,
+            opportunity,
+            decision,
+            task,
+            knowledge,
+        )
+
+    def execute(self, signal: Signal):
+        """
+        Execute the Studio pipeline and return the final knowledge record.
+        """
+
+        (
+            research_result,
+            opportunity,
+            decision,
+            task,
+            knowledge,
+        ) = self._run_pipeline(signal)
+
+        return knowledge
+
+    def execute_with_trace(self, signal: Signal) -> PipelineResult:
+        """
+        Execute the Studio pipeline and return the complete runtime trace.
+        """
+
+        (
+            research_result,
+            opportunity,
+            decision,
+            task,
+            knowledge,
+        ) = self._run_pipeline(signal)
+
+        return PipelineResult(
+            signal=signal,
+            research_result=research_result,
+            opportunity=opportunity,
+            decision=decision,
+            task=task,
+            knowledge=knowledge,
         )
