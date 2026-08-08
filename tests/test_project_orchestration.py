@@ -93,3 +93,47 @@ def test_project_execution_with_no_signals_returns_empty_result():
 
     assert execution.project is project
     assert execution.results == []
+    assert execution.total_results == 0
+    assert execution.accepted_count == 0
+    assert execution.rejected_count == 0
+    assert execution.status == "NO_SIGNALS"
+
+
+def test_project_execution_provides_summary():
+
+    project = Project(
+        name="AI Research Project",
+        objective="Evaluate AI opportunities",
+        priority="HIGH",
+    )
+
+    accepted_signal = Signal(
+        title="AI infrastructure opportunity",
+        description="Strong AI infrastructure demand.",
+        source="Market",
+    )
+
+    rejected_signal = Signal(
+        title="Small idea",
+        description="Low strategic value.",
+        source="Internal",
+    )
+
+    context = ProjectContext(
+        project=project,
+        signals=[
+            accepted_signal,
+            rejected_signal,
+        ],
+    )
+
+    orchestrator = StudioOrchestrator()
+
+    execution = orchestrator.execute_project(
+        context
+    )
+
+    assert execution.total_results == 2
+    assert execution.accepted_count == 1
+    assert execution.rejected_count == 1
+    assert execution.status == "COMPLETED"

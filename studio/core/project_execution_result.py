@@ -15,3 +15,43 @@ class ProjectExecutionResult:
     project: Project
     results: List[PipelineResult] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
+
+    @property
+    def total_results(self) -> int:
+        """
+        Number of completed signal pipelines.
+        """
+        return len(self.results)
+
+    @property
+    def accepted_count(self) -> int:
+        """
+        Number of accepted opportunities.
+        """
+        return sum(
+            1
+            for result in self.results
+            if result.decision.decision == "ACCEPT"
+        )
+
+    @property
+    def rejected_count(self) -> int:
+        """
+        Number of non-accepted opportunities.
+        """
+        return sum(
+            1
+            for result in self.results
+            if result.decision.decision != "ACCEPT"
+        )
+
+    @property
+    def status(self) -> str:
+        """
+        Project execution status.
+        """
+
+        if not self.results:
+            return "NO_SIGNALS"
+
+        return "COMPLETED"
