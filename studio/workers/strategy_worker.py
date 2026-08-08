@@ -1,12 +1,12 @@
 from studio.workers.base import BaseWorker
 from studio.core.worker_context import WorkerContext
-from studio.core.models import Opportunity
+from studio.core.models import Opportunity, ResearchResult
 
 
 class StrategyWorker(BaseWorker):
     """
     Strategic analysis worker.
-    Converts signals into opportunities.
+    Converts signals and research results into opportunities.
     """
 
     def __init__(self):
@@ -20,6 +20,7 @@ class StrategyWorker(BaseWorker):
 
         self.input_types = [
             "Signal",
+            "ResearchResult",
             "WorkerContext",
         ]
 
@@ -30,10 +31,23 @@ class StrategyWorker(BaseWorker):
     def execute(self, context) -> Opportunity:
 
         if isinstance(context, WorkerContext):
+
+            if context.research_result is not None:
+                signal = context.research_result.signal
+            else:
+                signal = context.signal
+
+        elif isinstance(context, ResearchResult):
             signal = context.signal
 
         else:
             signal = context
+
+        if signal is None:
+            raise ValueError(
+                "StrategyWorker requires a Signal "
+                "or ResearchResult containing a Signal."
+            )
 
         title = signal.title.lower()
 
