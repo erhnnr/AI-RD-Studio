@@ -1,5 +1,6 @@
 from studio.workers.research_worker import ResearchWorker
 from studio.core.project import Project
+from studio.core.models import ResearchResult
 
 
 def test_research_worker_creates_report():
@@ -14,9 +15,10 @@ def test_research_worker_creates_report():
 
     result = worker.execute(project)
 
-    assert result["worker"] == "ResearchWorker"
-    assert "analysis" in result
-    assert result["project"] == "AI Education Platform"
+    assert isinstance(result, ResearchResult)
+    assert result.worker == "ResearchWorker"
+    assert "analysis" in result.analysis.lower()
+    assert result.project_name == "AI Education Platform"
 
 
 def test_research_worker_supports_signal_context_contract():

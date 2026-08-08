@@ -1,11 +1,12 @@
 from studio.workers.base import BaseWorker
 from studio.core.project import Project
 from studio.core.worker_context import WorkerContext
+from studio.core.models import ResearchResult
 
 
 class ResearchWorker(BaseWorker):
     """
-    Worker responsible for project research.
+    Worker responsible for project and signal research.
     """
 
     def __init__(self):
@@ -27,31 +28,31 @@ class ResearchWorker(BaseWorker):
             "ResearchResult",
         ]
 
-    def execute(self, context):
+    def execute(self, context) -> ResearchResult:
 
         if isinstance(context, WorkerContext):
             signal = context.signal
 
-            return {
-                "worker": self.name,
-                "signal": signal.title,
-                "analysis": (
+            return ResearchResult(
+                worker=self.name,
+                signal=signal,
+                analysis=(
                     f"Research analysis prepared for "
                     f"{signal.title}"
                 ),
-            }
+            )
 
         if isinstance(context, Project):
-            return {
-                "worker": self.name,
-                "project": context.name,
-                "analysis": (
+            return ResearchResult(
+                worker=self.name,
+                project_name=context.name,
+                analysis=(
                     f"Research analysis prepared for "
                     f"{context.name}"
                 ),
-            }
+            )
 
-        return {
-            "worker": self.name,
-            "analysis": "Research analysis prepared.",
-        }
+        return ResearchResult(
+            worker=self.name,
+            analysis="Research analysis prepared.",
+        )

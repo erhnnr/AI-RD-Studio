@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
@@ -46,6 +46,19 @@ class ResearchTask:
     opportunity: Opportunity
     objective: str
     status: str = "NEW"
+
+
+@dataclass
+class ResearchResult:
+    """
+    Structured result produced by a research worker.
+    """
+
+    analysis: str
+    worker: str = "ResearchWorker"
+    signal: Optional[Signal] = None
+    project_name: Optional[str] = None
+    created_at: datetime = field(default_factory=datetime.now)
 
 
 @dataclass
