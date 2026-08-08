@@ -1,4 +1,5 @@
 from studio.core.models import PipelineResult, Signal
+from studio.core.project_context import ProjectContext
 from studio.core.review_board import ReviewBoard
 from studio.runtime.runtime_guard import RuntimeGuard
 from studio.runtime.task_manager import TaskManager
@@ -196,3 +197,26 @@ class StudioOrchestrator:
             task=task,
             knowledge=knowledge,
         )
+
+    def execute_project(
+        self,
+        context: ProjectContext,
+    ):
+        """
+        Execute all signals belonging to a project.
+
+        Each signal runs through the existing validated
+        Studio pipeline and produces a PipelineResult.
+        """
+
+        results = []
+
+        for signal in context.signals:
+
+            result = self.execute_with_trace(
+                signal
+            )
+
+            results.append(result)
+
+        return results
