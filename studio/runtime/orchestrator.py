@@ -8,7 +8,7 @@ from studio.core.worker_context import WorkerContext
 
 class StudioOrchestrator:
     """
-    Coordinates Studio decision workflow.
+    Coordinates the Studio research and decision workflow.
     """
 
     def __init__(self):
@@ -19,11 +19,40 @@ class StudioOrchestrator:
 
     def execute(self, signal: Signal):
 
-        # Contract based worker selection
+        # -------------------------------------------------
+        # 1. Research
+        # -------------------------------------------------
+
+        research_worker = (
+            self.worker_registry.find_by_contract(
+                capability="research",
+                input_type="Signal",
+                output_type="ResearchResult",
+            )
+        )
+
+        # Backward compatibility fallback
+        if research_worker is None:
+            research_worker = self.worker_registry.get(
+                "research"
+            )
+
+        research_context = WorkerContext(
+            signal=signal
+        )
+
+        research_result = research_worker.execute(
+            research_context
+        )
+
+        # -------------------------------------------------
+        # 2. Strategy
+        # -------------------------------------------------
+
         strategy_worker = (
             self.worker_registry.find_by_contract(
                 capability="opportunity_scoring",
-                input_type="Signal",
+                input_type="ResearchResult",
                 output_type="Opportunity",
             )
         )
@@ -34,17 +63,21 @@ class StudioOrchestrator:
                 "strategy"
             )
 
-        context = WorkerContext(
-            signal=signal
+        opportunity = strategy_worker.execute(
+            research_result
         )
 
-        opportunity = strategy_worker.execute(
-            context
-        )
+        # -------------------------------------------------
+        # 3. Review
+        # -------------------------------------------------
 
         decision = self.review_board.evaluate(
             opportunity
         )
+
+        # -------------------------------------------------
+        # 4. Execution / Knowledge
+        # -------------------------------------------------
 
         if decision.decision == "ACCEPT":
 
