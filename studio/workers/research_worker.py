@@ -1,5 +1,6 @@
 from studio.workers.base import BaseWorker
 from studio.core.project import Project
+from studio.core.worker_context import WorkerContext
 
 
 class ResearchWorker(BaseWorker):
@@ -17,19 +18,40 @@ class ResearchWorker(BaseWorker):
         ]
 
         self.input_types = [
+            "Signal",
+            "WorkerContext",
             "Project",
         ]
 
         self.output_types = [
-            "ResearchAnalysis",
+            "ResearchResult",
         ]
 
-    def execute(self, project: Project):
+    def execute(self, context):
+
+        if isinstance(context, WorkerContext):
+            signal = context.signal
+
+            return {
+                "worker": self.name,
+                "signal": signal.title,
+                "analysis": (
+                    f"Research analysis prepared for "
+                    f"{signal.title}"
+                ),
+            }
+
+        if isinstance(context, Project):
+            return {
+                "worker": self.name,
+                "project": context.name,
+                "analysis": (
+                    f"Research analysis prepared for "
+                    f"{context.name}"
+                ),
+            }
 
         return {
             "worker": self.name,
-            "project": project.name,
-            "analysis": (
-                f"Research analysis prepared for {project.name}"
-            ),
+            "analysis": "Research analysis prepared.",
         }
