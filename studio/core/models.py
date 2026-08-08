@@ -58,3 +58,16 @@ class KnowledgeRecord:
     content: str
     tags: List[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
+class DecisionRecord:
+    """
+    Permanent record of strategic decisions.
+    """
+
+    decision: str
+    reason: str
+    confidence: int
+    next_action: str
+    created_at: datetime = field(default_factory=datetime.now)
