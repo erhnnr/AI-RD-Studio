@@ -46,8 +46,12 @@ def test_project_memory_persists_execution(tmp_path):
         "AI Education Platform"
     )
 
-    assert stored["total_results"] == 1
-    assert len(stored["executions"]) == 1
+    assert len(stored["history"]) == 1
+
+    first_run = stored["history"][0]
+
+    assert first_run["total_results"] == 1
+    assert len(first_run["executions"]) == 1
 
 
 def test_project_memory_survives_new_store_instance(
@@ -103,19 +107,25 @@ def test_project_memory_survives_new_store_instance(
         "Persistent Project"
     )
 
-    assert restored["total_results"] == 1
+    assert len(restored["history"]) == 1
 
-    assert (
-        restored["executions"][0]
-        ["research"]["analysis"]
+    first_run = restored["history"][0]
+
+    assert first_run["total_results"] == 1
+    assert len(first_run["executions"]) == 1
+
+    first_execution = (
+        first_run["executions"][0]
     )
 
     assert (
-        restored["executions"][0]
-        ["decision"]["decision"]
+        first_execution["research"]["analysis"]
     )
 
     assert (
-        restored["executions"][0]
-        ["knowledge"]["title"]
+        first_execution["decision"]["decision"]
+    )
+
+    assert (
+        first_execution["knowledge"]["title"]
     )

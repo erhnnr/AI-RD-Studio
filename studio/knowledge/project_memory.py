@@ -17,71 +17,42 @@ class ProjectMemoryStore:
         execution: ProjectExecutionResult,
     ) -> dict:
         """
-        Persist a completed project execution.
+        Persist a completed project execution without
+        overwriting previous executions of the same project.
         """
 
         memory = self._load_all()
 
         project_name = execution.project.name
 
-        project_record = {
-            "project": {
-                "name": execution.project.name,
-                "objective": execution.project.objective,
-                "priority": execution.project.priority,
-            },
-            "status": execution.status,
-            "total_results": execution.total_results,
-            "accepted_count": execution.accepted_count,
-            "rejected_count": execution.rejected_count,
-            "executions": [],
-        }
+        run_record = self._build_run_record(
+            execution
+        )
 
-        for result in execution.results:
+        if project_name not in memory:
 
-            task_record = None
-
-            if result.task is not None:
-                task_record = {
-                    "objective": result.task.objective,
-                    "status": result.task.status,
-                }
-
-            execution_record = {
-                "signal": {
-                    "title": result.signal.title,
-                    "description": result.signal.description,
-                    "source": result.signal.source,
+            memory[project_name] = {
+                "project": {
+                    "name": execution.project.name,
+                    "objective": execution.project.objective,
+                    "priority": execution.project.priority,
                 },
-                "research": {
-                    "analysis": result.research_result.analysis,
-                    "worker": result.research_result.worker,
-                },
-                "opportunity": {
-                    "impact": result.opportunity.impact,
-                    "urgency": result.opportunity.urgency,
-                    "feasibility": result.opportunity.feasibility,
-                    "strategic_fit": result.opportunity.strategic_fit,
-                    "score": result.opportunity.score,
-                },
-                "decision": {
-                    "decision": result.decision.decision,
-                    "reason": result.decision.reason,
-                    "next_action": result.decision.next_action,
-                },
-                "task": task_record,
-                "knowledge": {
-                    "title": result.knowledge.title,
-                    "content": result.knowledge.content,
-                    "tags": result.knowledge.tags,
-                },
+                "history": [],
             }
 
-            project_record["executions"].append(
-                execution_record
-            )
+        project_record = memory[
+            project_name
+        ]
 
-        memory[project_name] = project_record
+        project_record["project"] = {
+            "name": execution.project.name,
+            "objective": execution.project.objective,
+            "priority": execution.project.priority,
+        }
+
+        project_record["history"].append(
+            run_record
+        )
 
         self._save_all(memory)
 
@@ -96,12 +67,12 @@ class ProjectMemoryStore:
 
         return memory.get(project_name)
 
-    def get_research_history(
+    def get_execution_history(
         self,
         project_name: str,
     ) -> list:
         """
-        Return all persisted research records for a project.
+        Return all persisted execution runs for a project.
         """
 
         project = self.get_project(
@@ -111,50 +82,82 @@ class ProjectMemoryStore:
         if project is None:
             return []
 
-        return [
-            execution["research"]
-            for execution in project["executions"]
-        ]
+        return project.get(
+            "history",
+            [],
+        )
+
+    def get_research_history(
+        self,
+        project_name: str,
+    ) -> list:
+        """
+        Return research records from all project executions.
+        """
+
+        history = self.get_execution_history(
+            project_name
+        )
+
+        records = []
+
+        for run in history:
+
+            for execution in run["executions"]:
+
+                records.append(
+                    execution["research"]
+                )
+
+        return records
 
     def get_decision_history(
         self,
         project_name: str,
     ) -> list:
         """
-        Return all persisted decisions for a project.
+        Return decisions from all project executions.
         """
 
-        project = self.get_project(
+        history = self.get_execution_history(
             project_name
         )
 
-        if project is None:
-            return []
+        records = []
 
-        return [
-            execution["decision"]
-            for execution in project["executions"]
-        ]
+        for run in history:
+
+            for execution in run["executions"]:
+
+                records.append(
+                    execution["decision"]
+                )
+
+        return records
 
     def get_knowledge_history(
         self,
         project_name: str,
     ) -> list:
         """
-        Return all persisted knowledge records for a project.
+        Return knowledge records from all project executions.
         """
 
-        project = self.get_project(
+        history = self.get_execution_history(
             project_name
         )
 
-        if project is None:
-            return []
+        records = []
 
-        return [
-            execution["knowledge"]
-            for execution in project["executions"]
-        ]
+        for run in history:
+
+            for execution in run["executions"]:
+
+                records.append(
+                    execution["knowledge"]
+                )
+
+        return records
 
     def all_projects(self) -> dict:
         """
@@ -162,6 +165,86 @@ class ProjectMemoryStore:
         """
 
         return self._load_all()
+
+    def _build_run_record(
+        self,
+        execution: ProjectExecutionResult,
+    ) -> dict:
+        """
+        Convert a project execution into a persistent run record.
+        """
+
+        run_record = {
+            "created_at": execution.created_at.isoformat(),
+            "status": execution.status,
+            "total_results": execution.total_results,
+            "accepted_count": execution.accepted_count,
+            "rejected_count": execution.rejected_count,
+            "executions": [],
+        }
+
+        for result in execution.results:
+
+            task_record = None
+
+            if result.task is not None:
+
+                task_record = {
+                    "objective": result.task.objective,
+                    "status": result.task.status,
+                }
+
+            execution_record = {
+                "signal": {
+                    "title": result.signal.title,
+                    "description": result.signal.description,
+                    "source": result.signal.source,
+                },
+                "research": {
+                    "analysis": (
+                        result.research_result.analysis
+                    ),
+                    "worker": (
+                        result.research_result.worker
+                    ),
+                },
+                "opportunity": {
+                    "impact": result.opportunity.impact,
+                    "urgency": result.opportunity.urgency,
+                    "feasibility": (
+                        result.opportunity.feasibility
+                    ),
+                    "strategic_fit": (
+                        result.opportunity.strategic_fit
+                    ),
+                    "score": result.opportunity.score,
+                },
+                "decision": {
+                    "decision": (
+                        result.decision.decision
+                    ),
+                    "reason": (
+                        result.decision.reason
+                    ),
+                    "next_action": (
+                        result.decision.next_action
+                    ),
+                },
+                "task": task_record,
+                "knowledge": {
+                    "title": result.knowledge.title,
+                    "content": result.knowledge.content,
+                    "tags": result.knowledge.tags,
+                },
+            }
+
+            run_record[
+                "executions"
+            ].append(
+                execution_record
+            )
+
+        return run_record
 
     def _load_all(self) -> dict:
 
@@ -174,7 +257,10 @@ class ProjectMemoryStore:
         ) as file:
             return json.load(file)
 
-    def _save_all(self, memory: dict) -> None:
+    def _save_all(
+        self,
+        memory: dict,
+    ) -> None:
 
         self.path.parent.mkdir(
             parents=True,
@@ -185,6 +271,7 @@ class ProjectMemoryStore:
             "w",
             encoding="utf-8",
         ) as file:
+
             json.dump(
                 memory,
                 file,
