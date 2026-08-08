@@ -1,6 +1,7 @@
 from studio.core.models import PipelineResult, Signal
 from studio.core.project import Project
 from studio.core.project_context import ProjectContext
+from studio.core.project_execution_result import ProjectExecutionResult
 from studio.runtime.orchestrator import StudioOrchestrator
 
 
@@ -34,22 +35,37 @@ def test_orchestrator_executes_all_project_signals():
 
     orchestrator = StudioOrchestrator()
 
-    results = orchestrator.execute_project(
+    execution = orchestrator.execute_project(
         context
     )
 
-    assert len(results) == 2
+    assert isinstance(
+        execution,
+        ProjectExecutionResult,
+    )
+
+    assert execution.project is project
+    assert len(execution.results) == 2
 
     assert all(
         isinstance(result, PipelineResult)
-        for result in results
+        for result in execution.results
     )
 
-    assert results[0].signal is signal_1
-    assert results[1].signal is signal_2
+    assert execution.results[0].signal is signal_1
+    assert execution.results[1].signal is signal_2
 
-    assert results[0].research_result.signal is signal_1
-    assert results[1].research_result.signal is signal_2
+    assert (
+        execution.results[0].research_result.signal
+        is signal_1
+    )
+
+    assert (
+        execution.results[1].research_result.signal
+        is signal_2
+    )
+
+    assert execution.created_at is not None
 
 
 def test_project_execution_with_no_signals_returns_empty_result():
@@ -66,8 +82,14 @@ def test_project_execution_with_no_signals_returns_empty_result():
 
     orchestrator = StudioOrchestrator()
 
-    results = orchestrator.execute_project(
+    execution = orchestrator.execute_project(
         context
     )
 
-    assert results == []
+    assert isinstance(
+        execution,
+        ProjectExecutionResult,
+    )
+
+    assert execution.project is project
+    assert execution.results == []

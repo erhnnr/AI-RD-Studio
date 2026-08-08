@@ -1,5 +1,6 @@
 from studio.core.models import PipelineResult, Signal
 from studio.core.project_context import ProjectContext
+from studio.core.project_execution_result import ProjectExecutionResult
 from studio.core.review_board import ReviewBoard
 from studio.runtime.runtime_guard import RuntimeGuard
 from studio.runtime.task_manager import TaskManager
@@ -201,12 +202,9 @@ class StudioOrchestrator:
     def execute_project(
         self,
         context: ProjectContext,
-    ):
+    ) -> ProjectExecutionResult:
         """
         Execute all signals belonging to a project.
-
-        Each signal runs through the existing validated
-        Studio pipeline and produces a PipelineResult.
         """
 
         results = []
@@ -219,4 +217,7 @@ class StudioOrchestrator:
 
             results.append(result)
 
-        return results
+        return ProjectExecutionResult(
+            project=context.project,
+            results=results,
+        )
