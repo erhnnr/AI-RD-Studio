@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
 
+from studio.core.outcome import DecisionOutcome
 from studio.core.project_execution_result import ProjectExecutionResult
 
 
 class ProjectMemoryStore:
     """
-    Persistent project-level memory for Studio executions.
+    Persistent project-level memory for Studio executions
+    and decision-outcome history.
     """
 
     def __init__(self, path="data/project_memory.json"):
@@ -38,6 +40,7 @@ class ProjectMemoryStore:
                     "priority": execution.project.priority,
                 },
                 "history": [],
+                "outcomes": [],
             }
 
         project_record = memory[
@@ -50,6 +53,16 @@ class ProjectMemoryStore:
             "priority": execution.project.priority,
         }
 
+        project_record.setdefault(
+            "history",
+            [],
+        )
+
+        project_record.setdefault(
+            "outcomes",
+            [],
+        )
+
         project_record["history"].append(
             run_record
         )
@@ -57,6 +70,63 @@ class ProjectMemoryStore:
         self._save_all(memory)
 
         return project_record
+
+    def store_outcome(
+        self,
+        project_name: str,
+        outcome: DecisionOutcome,
+    ) -> dict:
+        """
+        Persist a DecisionOutcome for an existing project.
+        """
+
+        if not isinstance(
+            project_name,
+            str,
+        ) or not project_name.strip():
+            raise ValueError(
+                "project_name must be a non-empty string."
+            )
+
+        if not isinstance(
+            outcome,
+            DecisionOutcome,
+        ):
+            raise TypeError(
+                "outcome must be a DecisionOutcome."
+            )
+
+        memory = self._load_all()
+
+        project = memory.get(
+            project_name
+        )
+
+        if project is None:
+            raise KeyError(
+                f"Project not found: {project_name}"
+            )
+
+        project.setdefault(
+            "outcomes",
+            [],
+        )
+
+        outcome_record = (
+            self._build_outcome_record(
+                outcome
+            )
+        )
+
+        project["outcomes"].append(
+            outcome_record
+        )
+
+        self._save_all(
+            memory
+        )
+
+        return outcome_record
 
     def get_project(self, project_name: str):
         """
@@ -159,6 +229,26 @@ class ProjectMemoryStore:
 
         return records
 
+    def get_outcome_history(
+        self,
+        project_name: str,
+    ) -> list:
+        """
+        Return persisted decision outcomes for a project.
+        """
+
+        project = self.get_project(
+            project_name
+        )
+
+        if project is None:
+            return []
+
+        return project.get(
+            "outcomes",
+            [],
+        )
+
     def all_projects(self) -> dict:
         """
         Return all persisted project memories.
@@ -179,6 +269,7 @@ class ProjectMemoryStore:
             "status": execution.status,
             "total_results": execution.total_results,
             "accepted_count": execution.accepted_count,
+            "deferred_count": execution.deferred_count,
             "rejected_count": execution.rejected_count,
             "executions": [],
         }
@@ -192,6 +283,35 @@ class ProjectMemoryStore:
                 task_record = {
                     "objective": result.task.objective,
                     "status": result.task.status,
+                }
+
+            planning_record = None
+
+            if result.planning_result is not None:
+
+                planning_record = {
+                    "objective": (
+                        result.planning_result.objective
+                    ),
+                    "steps": (
+                        result.planning_result.steps
+                    ),
+                }
+
+            validation_record = None
+
+            if result.validation_result is not None:
+
+                validation_record = {
+                    "valid": (
+                        result.validation_result.valid
+                    ),
+                    "reason": (
+                        result.validation_result.reason
+                    ),
+                    "worker": (
+                        result.validation_result.worker
+                    ),
                 }
 
             execution_record = {
@@ -218,7 +338,18 @@ class ProjectMemoryStore:
                         result.opportunity.strategic_fit
                     ),
                     "score": result.opportunity.score,
+                    "evidence_state": (
+                        result.opportunity.evidence_state
+                    ),
+                    "evidence_confidence": (
+                        result.opportunity.evidence_confidence
+                    ),
+                    "rationale": (
+                        result.opportunity.rationale
+                    ),
                 },
+                "planning": planning_record,
+                "validation": validation_record,
                 "decision": {
                     "decision": (
                         result.decision.decision
@@ -245,6 +376,75 @@ class ProjectMemoryStore:
             )
 
         return run_record
+
+    def _build_outcome_record(
+        self,
+        outcome: DecisionOutcome,
+    ) -> dict:
+        """
+        Convert a DecisionOutcome into a persistent record.
+        """
+
+        observations = []
+
+        for observation in outcome.observations:
+
+            observations.append(
+                {
+                    "metric": observation.metric,
+                    "observed_value": (
+                        observation.observed_value
+                    ),
+                    "unit": observation.unit,
+                    "note": observation.note,
+                }
+            )
+
+        return {
+            "created_at": outcome.created_at.isoformat(),
+            "signal": {
+                "title": (
+                    outcome.opportunity.signal.title
+                ),
+                "description": (
+                    outcome.opportunity.signal.description
+                ),
+                "source": (
+                    outcome.opportunity.signal.source
+                ),
+            },
+            "opportunity": {
+                "score": outcome.opportunity.score,
+                "evidence_state": (
+                    outcome.opportunity.evidence_state
+                ),
+                "evidence_confidence": (
+                    outcome.opportunity.evidence_confidence
+                ),
+            },
+            "planning": {
+                "objective": (
+                    outcome.planning_result.objective
+                ),
+                "steps": (
+                    outcome.planning_result.steps
+                ),
+            },
+            "decision": {
+                "decision": (
+                    outcome.decision.decision
+                ),
+                "reason": (
+                    outcome.decision.reason
+                ),
+                "next_action": (
+                    outcome.decision.next_action
+                ),
+            },
+            "status": outcome.status.value,
+            "observations": observations,
+            "summary": outcome.summary,
+        }
 
     def _load_all(self) -> dict:
 
