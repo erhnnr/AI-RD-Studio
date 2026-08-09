@@ -62,6 +62,19 @@ class ResearchResult:
 
 
 @dataclass
+class PlanningResult:
+    """
+    Structured execution plan produced from an opportunity.
+    """
+
+    opportunity: Opportunity
+    objective: str
+    steps: List[str] = field(default_factory=list)
+    worker: str = "PlanningWorker"
+    created_at: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
 class KnowledgeRecord:
     """
     Permanent Studio memory entry.
@@ -95,7 +108,7 @@ class PipelineResult:
     signal: Signal
     research_result: ResearchResult
     opportunity: Opportunity
-    decision: DecisionRecord
+    decision: object
     task: Optional[ResearchTask]
     knowledge: KnowledgeRecord
     created_at: datetime = field(default_factory=datetime.now)
