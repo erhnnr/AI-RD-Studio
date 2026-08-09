@@ -35,14 +35,25 @@ class ProjectExecutionResult:
         )
 
     @property
-    def rejected_count(self) -> int:
+    def deferred_count(self) -> int:
         """
-        Number of non-accepted opportunities.
+        Number of deferred opportunities.
         """
         return sum(
             1
             for result in self.results
-            if result.decision.decision != "ACCEPT"
+            if result.decision.decision == "DEFER"
+        )
+
+    @property
+    def rejected_count(self) -> int:
+        """
+        Number of rejected opportunities.
+        """
+        return sum(
+            1
+            for result in self.results
+            if result.decision.decision == "REJECT"
         )
 
     @property

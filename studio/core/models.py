@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from studio.core.evidence import Claim
+from studio.core.experiment import Experiment, Hypothesis
 
 
 @dataclass
@@ -66,8 +67,27 @@ class PlanningResult:
     opportunity: Opportunity
     objective: str
     steps: List[str] = field(default_factory=list)
+    hypothesis: Optional[Hypothesis] = None
+    experiment: Optional[Experiment] = None
     worker: str = "PlanningWorker"
     created_at: datetime = field(default_factory=datetime.now)
+
+    def __post_init__(self) -> None:
+        if self.hypothesis is not None and not isinstance(
+            self.hypothesis,
+            Hypothesis,
+        ):
+            raise TypeError(
+                "PlanningResult.hypothesis must be a Hypothesis or None."
+            )
+
+        if self.experiment is not None and not isinstance(
+            self.experiment,
+            Experiment,
+        ):
+            raise TypeError(
+                "PlanningResult.experiment must be an Experiment or None."
+            )
 
 
 @dataclass
