@@ -3,7 +3,11 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from studio.core.models import Opportunity, PlanningResult
+from studio.core.models import (
+    Opportunity,
+    PipelineResult,
+    PlanningResult,
+)
 
 
 ObservedValue = Union[int, float, str]
@@ -81,7 +85,50 @@ class DecisionOutcome:
         default_factory=list
     )
     summary: str = ""
+    source_trace_id: Optional[str] = None
     created_at: datetime = field(default_factory=datetime.now)
+
+    @classmethod
+    def from_pipeline_result(
+        cls,
+        pipeline_result: PipelineResult,
+        status: OutcomeStatus,
+        observations: Optional[List[OutcomeObservation]] = None,
+        summary: str = "",
+    ) -> "DecisionOutcome":
+        """
+        Create an outcome from an actual Studio pipeline trace.
+
+        This preserves the identity of the Opportunity,
+        PlanningResult and Decision that produced the outcome.
+        """
+
+        if not isinstance(
+            pipeline_result,
+            PipelineResult,
+        ):
+            raise TypeError(
+                "pipeline_result must be a PipelineResult."
+            )
+
+        if pipeline_result.planning_result is None:
+            raise ValueError(
+                "PipelineResult must contain PlanningResult "
+                "before an outcome can be attached."
+            )
+
+        if observations is None:
+            observations = []
+
+        return cls(
+            opportunity=pipeline_result.opportunity,
+            planning_result=pipeline_result.planning_result,
+            decision=pipeline_result.decision,
+            status=status,
+            observations=observations,
+            summary=summary,
+            source_trace_id=pipeline_result.trace_id,
+        )
 
     def __post_init__(self) -> None:
         if not isinstance(self.opportunity, Opportunity):
@@ -146,6 +193,16 @@ class DecisionOutcome:
             raise TypeError(
                 "DecisionOutcome.summary must be a string."
             )
+
+        if self.source_trace_id is not None:
+            if (
+                not isinstance(self.source_trace_id, str)
+                or not self.source_trace_id.strip()
+            ):
+                raise ValueError(
+                    "DecisionOutcome.source_trace_id must be "
+                    "a non-empty string or None."
+                )
 
         if self.status == OutcomeStatus.NOT_OBSERVED:
             if self.observations:

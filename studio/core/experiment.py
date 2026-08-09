@@ -1,5 +1,12 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
+
+
+class MeasurementDirection(str, Enum):
+    AT_LEAST = "AT_LEAST"
+    AT_MOST = "AT_MOST"
+    EXACT = "EXACT"
 
 
 @dataclass
@@ -8,6 +15,7 @@ class Measurement:
     baseline: Optional[float] = None
     target: Optional[float] = None
     unit: Optional[str] = None
+    direction: Optional[MeasurementDirection] = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.metric, str) or not self.metric.strip():
@@ -37,6 +45,15 @@ class Measurement:
         ):
             raise TypeError(
                 "Measurement.unit must be a string or None."
+            )
+
+        if self.direction is not None and not isinstance(
+            self.direction,
+            MeasurementDirection,
+        ):
+            raise TypeError(
+                "Measurement.direction must be "
+                "a MeasurementDirection or None."
             )
 
         if self.baseline is not None:

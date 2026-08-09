@@ -107,6 +107,16 @@ class ProjectMemoryStore:
                 f"Project not found: {project_name}"
             )
 
+        if outcome.source_trace_id is not None:
+            if not self._execution_trace_exists(
+                project,
+                outcome.source_trace_id,
+            ):
+                raise KeyError(
+                    "Execution trace not found for outcome: "
+                    f"{outcome.source_trace_id}"
+                )
+
         project.setdefault(
             "outcomes",
             [],
@@ -249,6 +259,78 @@ class ProjectMemoryStore:
             [],
         )
 
+    def get_decision_outcome_trace(
+        self,
+        project_name: str,
+        source_trace_id: str,
+    ):
+        """
+        Reconstruct a persisted execution together with
+        the observed outcome attached to that execution.
+        """
+
+        if not isinstance(
+            source_trace_id,
+            str,
+        ) or not source_trace_id.strip():
+            raise ValueError(
+                "source_trace_id must be a non-empty string."
+            )
+
+        project = self.get_project(
+            project_name
+        )
+
+        if project is None:
+            return None
+
+        execution_record = None
+
+        for run in project.get(
+            "history",
+            [],
+        ):
+
+            for execution in run.get(
+                "executions",
+                [],
+            ):
+
+                if (
+                    execution.get("trace_id")
+                    == source_trace_id
+                ):
+                    execution_record = execution
+                    break
+
+            if execution_record is not None:
+                break
+
+        outcome_record = None
+
+        for outcome in project.get(
+            "outcomes",
+            [],
+        ):
+
+            if (
+                outcome.get("source_trace_id")
+                == source_trace_id
+            ):
+                outcome_record = outcome
+                break
+
+        if (
+            execution_record is None
+            or outcome_record is None
+        ):
+            return None
+
+        return {
+            "execution": execution_record,
+            "outcome": outcome_record,
+        }
+
     def all_projects(self) -> dict:
         """
         Return all persisted project memories.
@@ -285,87 +367,40 @@ class ProjectMemoryStore:
                     "status": result.task.status,
                 }
 
-            planning_record = None
-
-            if result.planning_result is not None:
-
-                planning_record = {
-                    "objective": (
-                        result.planning_result.objective
-                    ),
-                    "steps": (
-                        result.planning_result.steps
-                    ),
-                }
-
-            validation_record = None
-
-            if result.validation_result is not None:
-
-                validation_record = {
-                    "valid": (
-                        result.validation_result.valid
-                    ),
-                    "reason": (
-                        result.validation_result.reason
-                    ),
-                    "worker": (
-                        result.validation_result.worker
-                    ),
-                }
-
             execution_record = {
+                "trace_id": result.trace_id,
+                "created_at": result.created_at.isoformat(),
                 "signal": {
                     "title": result.signal.title,
                     "description": result.signal.description,
                     "source": result.signal.source,
-                },
-                "research": {
-                    "analysis": (
-                        result.research_result.analysis
-                    ),
-                    "worker": (
-                        result.research_result.worker
+                    "created_at": (
+                        result.signal.created_at.isoformat()
                     ),
                 },
-                "opportunity": {
-                    "impact": result.opportunity.impact,
-                    "urgency": result.opportunity.urgency,
-                    "feasibility": (
-                        result.opportunity.feasibility
-                    ),
-                    "strategic_fit": (
-                        result.opportunity.strategic_fit
-                    ),
-                    "score": result.opportunity.score,
-                    "evidence_state": (
-                        result.opportunity.evidence_state
-                    ),
-                    "evidence_confidence": (
-                        result.opportunity.evidence_confidence
-                    ),
-                    "rationale": (
-                        result.opportunity.rationale
-                    ),
-                },
-                "planning": planning_record,
-                "validation": validation_record,
-                "decision": {
-                    "decision": (
-                        result.decision.decision
-                    ),
-                    "reason": (
-                        result.decision.reason
-                    ),
-                    "next_action": (
-                        result.decision.next_action
-                    ),
-                },
+                "research": self._build_research_record(
+                    result.research_result
+                ),
+                "opportunity": self._build_opportunity_record(
+                    result.opportunity
+                ),
+                "planning": self._build_planning_record(
+                    result.planning_result
+                ),
+                "validation": self._build_validation_record(
+                    result.validation_result
+                ),
+                "decision": self._build_decision_record(
+                    result.decision
+                ),
                 "task": task_record,
                 "knowledge": {
                     "title": result.knowledge.title,
                     "content": result.knowledge.content,
                     "tags": result.knowledge.tags,
+                    "created_at": (
+                        result.knowledge.created_at.isoformat()
+                    ),
                 },
             }
 
@@ -376,6 +411,177 @@ class ProjectMemoryStore:
             )
 
         return run_record
+
+    def _build_research_record(
+        self,
+        research_result,
+    ) -> dict:
+        return {
+            "analysis": research_result.analysis,
+            "worker": research_result.worker,
+            "created_at": (
+                research_result.created_at.isoformat()
+            ),
+            "claims": [
+                self._build_claim_record(claim)
+                for claim in research_result.claims
+            ],
+        }
+
+    def _build_claim_record(
+        self,
+        claim,
+    ) -> dict:
+        return {
+            "statement": claim.statement,
+            "confidence": claim.confidence,
+            "uncertainty": claim.uncertainty,
+            "supporting_evidence": [
+                self._build_evidence_record(evidence)
+                for evidence in claim.supporting_evidence
+            ],
+            "counter_evidence": [
+                self._build_evidence_record(evidence)
+                for evidence in claim.counter_evidence
+            ],
+        }
+
+    def _build_evidence_record(
+        self,
+        evidence,
+    ) -> dict:
+        return {
+            "content": evidence.content,
+            "confidence": evidence.confidence,
+            "provenance_note": evidence.provenance_note,
+            "source": {
+                "name": evidence.source.name,
+                "source_type": evidence.source.source_type,
+                "reference": evidence.source.reference,
+                "metadata": evidence.source.metadata,
+            },
+        }
+
+    def _build_opportunity_record(
+        self,
+        opportunity,
+    ) -> dict:
+        return {
+            "impact": opportunity.impact,
+            "urgency": opportunity.urgency,
+            "feasibility": opportunity.feasibility,
+            "strategic_fit": opportunity.strategic_fit,
+            "score": opportunity.score,
+            "evidence_state": opportunity.evidence_state,
+            "evidence_confidence": opportunity.evidence_confidence,
+            "rationale": opportunity.rationale,
+        }
+
+    def _build_planning_record(
+        self,
+        planning_result,
+    ):
+        if planning_result is None:
+            return None
+
+        hypothesis_record = None
+
+        if planning_result.hypothesis is not None:
+            hypothesis_record = {
+                "statement": (
+                    planning_result.hypothesis.statement
+                ),
+                "assumptions": (
+                    planning_result.hypothesis.assumptions
+                ),
+                "success_criteria": (
+                    planning_result.hypothesis.success_criteria
+                ),
+                "failure_criteria": (
+                    planning_result.hypothesis.failure_criteria
+                ),
+            }
+
+        experiment_record = None
+
+        if planning_result.experiment is not None:
+
+            measurements = []
+
+            for measurement in (
+                planning_result.experiment.measurements
+            ):
+                direction = None
+
+                if measurement.direction is not None:
+                    direction = (
+                        measurement.direction.value
+                    )
+
+                measurements.append(
+                    {
+                        "metric": measurement.metric,
+                        "baseline": measurement.baseline,
+                        "target": measurement.target,
+                        "unit": measurement.unit,
+                        "direction": direction,
+                    }
+                )
+
+            experiment_record = {
+                "objective": (
+                    planning_result.experiment.objective
+                ),
+                "method": (
+                    planning_result.experiment.method
+                ),
+                "measurements": measurements,
+                "stop_conditions": (
+                    planning_result.experiment.stop_conditions
+                ),
+            }
+
+        return {
+            "objective": planning_result.objective,
+            "steps": planning_result.steps,
+            "worker": planning_result.worker,
+            "created_at": (
+                planning_result.created_at.isoformat()
+            ),
+            "hypothesis": hypothesis_record,
+            "experiment": experiment_record,
+        }
+
+    def _build_validation_record(
+        self,
+        validation_result,
+    ):
+        if validation_result is None:
+            return None
+
+        return {
+            "valid": validation_result.valid,
+            "reason": validation_result.reason,
+            "worker": validation_result.worker,
+            "created_at": (
+                validation_result.created_at.isoformat()
+            ),
+        }
+
+    def _build_decision_record(
+        self,
+        decision,
+    ) -> dict:
+        return {
+            "decision": decision.decision,
+            "reason": decision.reason,
+            "confidence": getattr(
+                decision,
+                "confidence",
+                None,
+            ),
+            "next_action": decision.next_action,
+        }
 
     def _build_outcome_record(
         self,
@@ -401,6 +607,7 @@ class ProjectMemoryStore:
             )
 
         return {
+            "source_trace_id": outcome.source_trace_id,
             "created_at": outcome.created_at.isoformat(),
             "signal": {
                 "title": (
@@ -413,38 +620,40 @@ class ProjectMemoryStore:
                     outcome.opportunity.signal.source
                 ),
             },
-            "opportunity": {
-                "score": outcome.opportunity.score,
-                "evidence_state": (
-                    outcome.opportunity.evidence_state
-                ),
-                "evidence_confidence": (
-                    outcome.opportunity.evidence_confidence
-                ),
-            },
-            "planning": {
-                "objective": (
-                    outcome.planning_result.objective
-                ),
-                "steps": (
-                    outcome.planning_result.steps
-                ),
-            },
-            "decision": {
-                "decision": (
-                    outcome.decision.decision
-                ),
-                "reason": (
-                    outcome.decision.reason
-                ),
-                "next_action": (
-                    outcome.decision.next_action
-                ),
-            },
+            "opportunity": self._build_opportunity_record(
+                outcome.opportunity
+            ),
+            "planning": self._build_planning_record(
+                outcome.planning_result
+            ),
+            "decision": self._build_decision_record(
+                outcome.decision
+            ),
             "status": outcome.status.value,
             "observations": observations,
             "summary": outcome.summary,
         }
+
+    def _execution_trace_exists(
+        self,
+        project: dict,
+        trace_id: str,
+    ) -> bool:
+        for run in project.get(
+            "history",
+            [],
+        ):
+            for execution in run.get(
+                "executions",
+                [],
+            ):
+                if (
+                    execution.get("trace_id")
+                    == trace_id
+                ):
+                    return True
+
+        return False
 
     def _load_all(self) -> dict:
 

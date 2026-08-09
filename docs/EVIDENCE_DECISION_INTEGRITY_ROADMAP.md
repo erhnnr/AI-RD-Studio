@@ -1,29 +1,18 @@
-Tamam. Önce **ROADMAP** belgesini sabitleyelim.
-
-Aç:
-
-```powershell
-code docs\EVIDENCE_DECISION_INTEGRITY_ROADMAP.md
-```
-
-Dosyanın tamamını bununla değiştir:
-
-````markdown
 # Evidence & Decision Integrity Cycle Roadmap
 
-Version: 0.1
-Status: ACTIVE ROADMAP
+Version: 1.0
+Status: COMPLETE — FROZEN
 Date: 2026-08-09
 
 ---
 
 # Purpose
 
-This roadmap defines the next development cycle of AI-RD-Studio after the stabilized v0.2.0 baseline and the post-freeze reality review.
+This roadmap defines the Evidence & Decision Integrity development cycle of AI-RD-Studio after the stabilized v0.2.0 baseline and the post-freeze reality review.
 
-The objective of this cycle is not to increase the number of workers or features.
+The objective of this cycle was not to increase the number of workers or features.
 
-The objective is to transform the Studio from a structurally connected R&D pipeline into an evidence-driven, causally connected, explainable decision system.
+The objective was to transform the Studio from a structurally connected R&D pipeline into an evidence-driven, causally connected, explainable decision system.
 
 The central principle is:
 
@@ -31,9 +20,9 @@ The central principle is:
 
 ---
 
-# Current Baseline
+# Historical Baseline
 
-The current stable baseline is:
+The cycle started from:
 
 ```text
 AI-RD-Studio v0.2.0
@@ -41,7 +30,7 @@ AI-RD-Studio v0.2.0
 Git baseline frozen
 ````
 
-The current runtime includes:
+The baseline runtime included:
 
 * ResearchWorker
 * StrategyWorker
@@ -56,36 +45,38 @@ The current runtime includes:
 * Persistent project history
 * LM Studio research provider boundary
 
-The current architecture is preserved.
+The architecture was preserved.
 
-A rewrite is not part of this cycle.
+A rewrite was not part of this cycle.
 
 ---
 
-# Current Problem
+# Baseline Problem
 
-The v0.2.0 architecture is structurally sound, but the intelligence flowing through it is still incomplete.
+At cycle start, the v0.2.0 architecture was structurally sound, but the intelligence flowing through it was incomplete.
 
-The main gaps are:
+The main gaps were:
 
-* Research is primarily prose
-* Evidence is not first-class structured data
-* Source provenance is weak
-* Research does not yet causally influence Strategy strongly enough
-* Strategy scoring is still heuristic
-* Hypotheses are not explicitly represented
-* Planning is not yet experiment-oriented
-* Validation is mostly structural
-* Validation is not yet a real decision gate
-* ACCEPT / DEFER / REJECT semantics are not fully consistent
-* Software tests do not measure semantic decision quality
-* Real-world outcomes do not yet close the learning loop
+* Research was primarily prose.
+* Evidence was not first-class structured data.
+* Source provenance was weak.
+* Research did not causally influence Strategy strongly enough.
+* Strategy scoring was heuristic.
+* Hypotheses were not explicitly represented.
+* Planning was not experiment-oriented.
+* Validation was mostly structural.
+* Validation was not a real decision gate.
+* ACCEPT / DEFER / REJECT semantics were not fully consistent.
+* Software tests did not measure semantic decision quality.
+* Real-world outcomes did not close the decision-feedback loop.
+
+These gaps defined the Evidence & Decision Integrity Cycle.
 
 ---
 
 # Cycle Goal
 
-At the end of this cycle, AI-RD-Studio should be able to:
+The cycle required AI-RD-Studio to become able to:
 
 1. Represent claims and evidence explicitly.
 2. Track where evidence came from.
@@ -96,15 +87,21 @@ At the end of this cycle, AI-RD-Studio should be able to:
 7. Produce measurable experiment-oriented plans.
 8. Use validation as an actual progression gate.
 9. Distinguish decision states correctly.
-10. Evaluate decision quality using semantic benchmark cases.
+10. Evaluate decision behavior using semantic benchmark cases.
 11. Preserve a more complete decision trace.
-12. Define how observed real-world outcomes feed back into future reasoning.
+12. Record observed outcomes without falsely claiming autonomous learning.
+
+Status:
+
+```text
+ACHIEVED WITHIN THE DECLARED CYCLE SCOPE
+```
 
 ---
 
 # Core Success Invariant
 
-The entire cycle is guided by this invariant:
+The entire cycle was guided by this invariant:
 
 ```text
 Same Signal
@@ -122,13 +119,13 @@ Strong Contradictory Evidence
 Materially Different Evaluation
 ```
 
-If the Studio cannot demonstrate this reliably and explainably, the cycle is not complete.
+This invariant is now covered by causal and semantic tests.
 
 ---
 
 # Phase 1 — Evidence & Provenance Foundation
 
-Status: PLANNED
+Status: COMPLETE
 
 ## Goal
 
@@ -136,128 +133,136 @@ Transform research output from prose-only analysis into structured evidence-bear
 
 ## Problem
 
-Current `ResearchResult` primarily carries:
+At cycle start, `ResearchResult` primarily carried:
 
 ```text
 analysis: str
 ```
 
-This is insufficient for an Evidence First system.
+This was insufficient for an Evidence First system.
 
-The Studio cannot reliably answer:
+The Studio needed to answer:
 
 * What is being claimed?
 * What evidence supports it?
 * What evidence contradicts it?
 * Where did the evidence come from?
-* How trustworthy is the source?
+* How strong is the represented evidence?
 * What remains uncertain?
 
-## Required Concepts
+## Implemented Concepts
 
-The minimum evidence model should support:
+The minimum evidence model now supports:
 
 * Claim
 * Evidence
 * Counter-evidence
-* Source
+* EvidenceSource
 * Provenance
 * Confidence
 * Uncertainty
 
-The implementation must remain minimal.
+The implementation remains intentionally minimal.
 
-No abstraction should be introduced without a concrete use in the active pipeline.
-
-## Entry Criteria
-
-* v0.2.0 baseline is clean and tested.
-* Reality review is committed.
-* Roadmap and cycle rules are accepted.
+Signal-derived evidence is explicitly treated as unverified input evidence rather than independent verification.
 
 ## Exit Criteria
 
-Phase 1 is complete only when:
+* ResearchResult can carry structured evidence. — PASS
+* At least one claim can reference supporting evidence. — PASS
+* Counter-evidence can be represented separately. — PASS
+* Evidence has source/provenance information. — PASS
+* Confidence and uncertainty can be represented. — PASS
+* Backward compatibility is preserved where required. — PASS
+* Software regression suite passes. — PASS
+* Phase 1 tests pass. — PASS
+* Git checkpoint completed. — PASS
 
-* ResearchResult can carry structured evidence.
-* At least one claim can reference supporting evidence.
-* Counter-evidence can be represented separately.
-* Evidence has source/provenance information.
-* Confidence or uncertainty can be represented.
-* Existing deterministic research behavior remains backward compatible where required.
-* Software regression suite passes.
-* New Phase 1 tests pass.
-* Git checkpoint is clean.
+Phase 1:
+
+```text
+COMPLETE
+```
 
 ---
 
 # Phase 2 — Research to Strategy Causal Link
 
-Status: PLANNED
+Status: COMPLETE
 
 ## Goal
 
 Make Strategy materially dependent on research evidence.
 
-## Problem
-
-Current Strategy behavior can produce similar evaluations despite contradictory research because the research analysis is not meaningfully consumed.
-
 ## Required Behavior
 
-Strategy must consider:
+Strategy considers structured research evidence including:
 
 * Supporting evidence
 * Counter-evidence
 * Evidence strength
 * Confidence
 * Uncertainty
-* Risk indicators
 
-The existing title-based AI heuristic must no longer be the primary driver of strategic evaluation.
+The title-based `"AI"` heuristic is not the primary strategic driver.
 
-## Core Test
+## Core Invariant
 
 ```text
 Same Signal
 
 Research A:
-Strong credible supporting evidence
+Strong supporting evidence
 
 Research B:
-Strong credible contradictory evidence
+Strong contradictory evidence
 
 Expected:
-Different Opportunity evaluation
-and/or
-Different Decision trajectory
+Materially different Opportunity evaluation
+and materially different decision trajectory
 ```
+
+The system now distinguishes:
+
+```text
+SUPPORTING
+INSUFFICIENT
+MIXED
+CONTRADICTORY
+```
+
+Evidence state affects Opportunity evaluation and downstream decisions.
 
 ## Exit Criteria
 
-Phase 2 is complete only when:
+* Strategy consumes structured research evidence. — PASS
+* Opposing evidence alters evaluation. — PASS
+* Supporting evidence alters evaluation. — PASS
+* `"AI"` keyword does not determine strategic value. — PASS
+* Causal behavior is covered by tests. — PASS
+* Causal Integrity Gate passes. — PASS
+* Regression suite passes. — PASS
+* Git checkpoint completed. — PASS
 
-* Strategy consumes structured research evidence.
-* Opposing credible evidence can lower or alter evaluation.
-* Supporting credible evidence can increase evaluation.
-* The decision path is not determined by the presence of keywords such as "AI".
-* The causal behavior is covered by tests.
-* Regression suite passes.
-* Git checkpoint is clean.
+Phase 2:
+
+```text
+COMPLETE
+```
 
 ---
 
 # Phase 3 — Hypothesis, Experiment and Decision Semantics
 
-Status: PLANNED
+Status: COMPLETE
 
 ## Goal
 
 Move from opportunity scoring toward testable R&D reasoning.
 
-## Required Concepts
+## Implemented Concepts
 
-The Studio should be able to represent:
+The Studio now represents:
 
 * Hypothesis
 * Assumption
@@ -267,72 +272,76 @@ The Studio should be able to represent:
 * Measurement
 * Stop condition
 
-The exact object model must remain minimal.
-
-## Planning Requirement
-
-Planning should become tied to:
+Planning is tied to:
 
 * What is being tested
 * Why it matters
-* What evidence would confirm it
-* What evidence would falsify it
-* How success will be measured
+* What would support the hypothesis
+* What would challenge it
+* How an experiment may be structured
+* How outcomes may be measured
+
+Planning remains intentionally domain-agnostic at this stage.
 
 ## Decision Semantics
 
-The following states must remain distinct:
+The following states remain distinct:
 
 * ACCEPT
 * DEFER
 * REJECT
 
-If additional states are introduced, such as:
+Mandatory invariant:
 
-* RESEARCH_MORE
-* REVISE_PLAN
+```text
+DEFER != REJECT
+```
 
-they require an explicit architectural decision.
+No additional decision states were introduced without an architectural decision.
 
 ## Exit Criteria
 
-Phase 3 is complete only when:
+* Testable hypotheses can be represented. — PASS
+* Plans state what is being tested. — PASS
+* Success/failure criteria can be expressed. — PASS
+* ACCEPT, DEFER and REJECT remain distinct. — PASS
+* DEFER is not counted as REJECT. — PASS
+* Regression suite passes. — PASS
+* Git checkpoint completed. — PASS
 
-* At least one testable hypothesis can be represented.
-* A plan can state what is being tested.
-* Success/failure criteria can be expressed.
-* ACCEPT, DEFER and REJECT are semantically distinct in summaries and tests.
-* `DEFER` is not silently counted as `REJECT`.
-* Regression suite passes.
-* Git checkpoint is clean.
+Phase 3:
+
+```text
+COMPLETE
+```
 
 ---
 
 # Phase 4 — Validation as a Real Decision Gate
 
-Status: PLANNED
+Status: COMPLETE
 
 ## Goal
 
 Transform Validation from structural checking into a real progression gate.
 
-## Validation Dimensions
+## Implemented Validation Behavior
 
-The design should evaluate at least:
+Validation checks whether the controlled planning path is suitable for progression.
 
-* Structural completeness
-* Evidence sufficiency
-* Consistency
-* Risk awareness
-* Measurability
-* Feasibility
-* Traceability
-* Confidence
-* Stop condition
+It evaluates declared conditions including:
 
-Not every dimension must become a complex scoring subsystem.
+* Evidence state
+* Hypothesis presence
+* Success criteria
+* Failure criteria
+* Experiment definition
+* Measurement presence
+* Stop conditions
 
-The implementation should remain minimal and explicit.
+Validation remains bounded to the implemented Studio decision model.
+
+It is not described as real-world product validation.
 
 ## Mandatory Invariant
 
@@ -342,22 +351,34 @@ cannot silently produce
 ACCEPT
 ```
 
+This invariant is enforced in runtime control flow.
+
+If validation blocks progression:
+
+* ReviewBoard acceptance is not allowed.
+* The result becomes DEFER or REJECT according to explicit policy.
+* No task is created.
+
 ## Exit Criteria
 
-Phase 4 is complete only when:
+* Validation result affects runtime control flow. — PASS
+* Invalid plans cannot silently proceed as ACCEPT. — PASS
+* Validation reasons are explicit. — PASS
+* Validation failure paths are integration tested. — PASS
+* Regression suite passes. — PASS
+* Git checkpoint completed. — PASS
 
-* Validation result affects runtime control flow.
-* Invalid or insufficiently supported plans cannot proceed as ACCEPT.
-* Validation reasons are explicit.
-* Validation failure paths are covered by integration tests.
-* Regression suite passes.
-* Git checkpoint is clean.
+Phase 4:
+
+```text
+COMPLETE
+```
 
 ---
 
 # Phase 5 — Semantic Evaluation Suite
 
-Status: PLANNED
+Status: COMPLETE
 
 ## Goal
 
@@ -368,7 +389,7 @@ Separate software correctness from decision-quality evaluation.
 ```text
 Software Tests
 !=
-AI / Decision Evaluation
+Semantic / Decision Evaluation
 ```
 
 Pytest remains responsible for:
@@ -379,126 +400,252 @@ Pytest remains responsible for:
 * Persistence
 * Regression
 
-A separate semantic evaluation suite will test:
+A separate semantic evaluation structure tests decision behavior such as:
 
-* Research quality
 * Evidence sensitivity
 * Decision consistency
 * Contradictory evidence handling
-* Risk handling
-* Insufficient evidence behavior
+* Insufficient evidence
 * Misleading labels
-* Confidence calibration
+* Strong non-AI evidence
+* Persuasive wording without sufficient evidence
+* End-to-end semantic consistency
 
-## Initial Benchmark Cases
+## Development Semantic Suite
 
-At minimum, include fixed cases for:
+Current recorded baseline:
 
-1. Strong opportunity with strong evidence
-2. Strong-looking opportunity with weak evidence
-3. Opportunity contradicted by strong evidence
-4. High-risk opportunity
-5. Insufficient evidence
-6. Strong non-AI opportunity
-7. Misleading AI-labelled opportunity
-8. Conflicting sources
-9. Validation failure
-10. DEFER case
+```text
+9 / 9 PASS
+```
+
+## Holdout / Adversarial Suite
+
+A separate holdout suite was created after development semantic cases.
+
+Initial first-run holdout result:
+
+```text
+5 / 5 PASS
+```
+
+No production tuning was performed against those cases before that first result.
+
+Subsequent execution is treated as regression evidence.
+
+If future production behavior is tuned directly against these cases, they must no longer be described as pristine holdout cases.
 
 ## Exit Criteria
 
-Phase 5 is complete only when:
+* Semantic evaluation is separate from ordinary software tests. — PASS
+* Fixed semantic cases exist. — PASS
+* Expected decision behavior is documented in tests. — PASS
+* Evidence sensitivity is measurable. — PASS
+* Decision regressions can be detected separately from ordinary Python correctness. — PASS
+* Holdout / Adversarial Evaluation Gate passed. — PASS
+* Git checkpoint completed. — PASS
 
-* Semantic evaluation is separate from unit/regression tests.
-* Fixed benchmark cases exist.
-* Expected decision behavior is documented.
-* Evidence sensitivity is measurable.
-* Decision regressions can be detected independently of Python correctness.
-* Git checkpoint is clean.
+Phase 5:
+
+```text
+COMPLETE
+```
 
 ---
 
 # Phase 6 — Outcome Feedback and Stabilization
 
-Status: PLANNED
+Status: COMPLETE
 
 ## Goal
 
-Define and stabilize the first real outcome-feedback loop.
+Define and stabilize the first real bounded outcome-feedback loop.
 
-## Problem
+## Implemented Outcome Flow
 
-The current system approximately ends at:
-
-```text
-Decision
-→ Task
-→ Knowledge
-```
-
-A mature R&D system needs:
+The Studio now supports:
 
 ```text
-Decision
+Pipeline Decision
 ↓
-Execution
-↓
-Observed Result
+Observed Outcome
 ↓
 Measurement
 ↓
-Comparison
+Deterministic Comparison when justified
 ↓
-Learning Record
+Persistent Outcome History
 ```
 
-## Required Design
+This is outcome feedback.
 
-The Studio should be able to preserve:
+It is not autonomous self-learning.
 
-* What decision was made
-* What outcome was expected
-* What actually happened
-* What was measured
-* Whether the hypothesis was supported
-* Whether the decision was good or poor
-* What should be learned from the result
+## Outcome Model
 
-This phase does not require autonomous self-learning.
+The implemented model includes:
 
-Outcome storage and explicit feedback are sufficient for this cycle.
+* OutcomeStatus
+* OutcomeObservation
+* DecisionOutcome
 
-## Stabilization Tasks
+Supported outcome states include:
 
-Before cycle completion:
+```text
+SUCCESS
+FAILURE
+PARTIAL
+INCONCLUSIVE
+NOT_OBSERVED
+```
 
-* Persistent trace must be reviewed.
-* Planning and validation persistence gaps must be addressed if still relevant.
-* Security trust boundaries must be reviewed.
-* Documentation must distinguish implemented, planned and vision.
-* Software tests must pass.
-* Semantic evaluation must pass according to agreed criteria.
-* Final architecture review must be performed.
+The Studio does not invent observed results.
+
+If no observation exists:
+
+```text
+NOT_OBSERVED
+```
+
+If an observation exists but a deterministic success/failure judgment is not justified:
+
+```text
+INCONCLUSIVE
+```
+
+remains valid.
+
+## Measurement Semantics
+
+Measurements now support explicit target direction:
+
+```text
+AT_LEAST
+AT_MOST
+EXACT
+```
+
+The Studio does not infer whether higher or lower values are desirable from metric names.
+
+If the target semantics are insufficient:
+
+```text
+NOT_COMPARABLE
+```
+
+is returned rather than inventing a judgment.
+
+## Persistent Decision Trace
+
+The persistent trace can preserve:
+
+```text
+Signal
+↓
+Research
+↓
+Claim
+↓
+Evidence / Counter-evidence
+↓
+Source / Provenance
+↓
+Opportunity
+↓
+Hypothesis
+↓
+Experiment
+↓
+Measurement
+↓
+Validation
+↓
+Decision
+↓
+Outcome
+```
+
+Pipeline execution records now include a trace identifier that can link an observed DecisionOutcome back to the originating execution.
+
+Unknown execution trace references are rejected.
+
+## Trust Boundary Review
+
+A final trust-boundary review was recorded in:
+
+```text
+docs/PHASE_6_STABILIZATION_REVIEW.md
+```
+
+Key boundaries reviewed include:
+
+* Signal input
+* ResearchProvider / LLM output
+* Structured evidence
+* Strategy
+* Validation
+* Decision-to-task progression
+* Observed outcomes
+* Persistent memory
+* External governance
+
+Review result:
+
+```text
+PASS
+```
+
+Important limitation:
+
+Structural validation and evidence representation do not prove factual real-world truth.
+
+The current ResearchProvider does not independently verify external facts.
+
+## Stabilization Results
+
+Semantic development suite:
+
+```text
+9 / 9 PASS
+```
+
+Holdout regression:
+
+```text
+5 / 5 PASS
+```
+
+Full software regression suite:
+
+```text
+244 / 244 PASS
+```
 
 ## Exit Criteria
 
-Phase 6 is complete only when:
+* Outcome feedback has a defined model. — PASS
+* At least one end-to-end case connects decision to observed outcome. — PASS
+* Full bounded decision trace can be reconstructed. — PASS
+* Trust-boundary review is complete. — PASS
+* Documentation is synchronized. — PASS
+* Software regression suite passes. — PASS
+* Semantic evaluation baseline is recorded. — PASS
+* Final Git checkpoint is required immediately after this document update. — PENDING FINAL CHECKPOINT
+* Mandatory STOP / REVIEW is performed. — PASS
 
-* Outcome feedback has a defined model.
-* At least one end-to-end case connects decision to observed outcome.
-* Full decision trace can be reconstructed.
-* Trust-boundary review is complete.
-* Documentation is synchronized.
-* Software regression suite passes.
-* Semantic evaluation baseline is recorded.
-* Final Git checkpoint is clean.
-* Mandatory STOP / REVIEW is performed.
+Phase 6 technical and architectural work:
+
+```text
+COMPLETE
+```
+
+Only the final clean Git checkpoint remains before the cycle is formally frozen.
 
 ---
 
 # Explicit Non-Goals
 
-The following are outside this cycle:
+The following were outside this cycle and remain unimplemented unless separately reviewed:
 
 * New worker proliferation
 * EngineeringWorker
@@ -513,7 +660,9 @@ The following are outside this cycle:
 * Fully autonomous company behavior
 * Premature generic Studio abstraction
 
-These may only be reconsidered after this cycle and a new review.
+Their absence does not represent a failure of this cycle.
+
+They may only be reconsidered after the mandatory post-cycle external review.
 
 ---
 
@@ -541,7 +690,9 @@ The Human Principal and external LLM may:
 * Approve or reject progression
 * Define discovery criteria
 
-AI-RD-Studio may increasingly automate bounded R&D work, but full autonomy is not the current objective.
+AI-RD-Studio may perform increasingly bounded R&D work.
+
+Full autonomy is not the current objective.
 
 ---
 
@@ -556,7 +707,7 @@ A future broader Studio family may eventually emerge for:
 * Engineering R&D
 * Other research and decision workflows
 
-This is vision only.
+This remains vision only.
 
 The current architecture must not be prematurely generalized around hypothetical future variants.
 
@@ -571,24 +722,27 @@ The cycle is not complete because:
 * More tests exist
 * More autonomy exists
 
-The cycle is complete when:
+The cycle is complete because the Studio can now demonstrate that evidence changes its reasoning and decisions in explainable, testable and traceable ways within the implemented scope.
 
-> The Studio can demonstrate that trustworthy evidence changes its reasoning and decisions in explainable, testable and traceable ways.
+The cycle now provides:
 
----
-
-# STOP / REVIEW Rule
-
-After Phase 6:
-
-STOP.
-
-Do not automatically begin another expansion cycle.
-
-Perform a new external review first.
-
-The next cycle must be justified by real capability gaps observed in the evidence-driven Studio.
-
+```text
+Evidence
+↓
+Causal Strategy
+↓
+Testable Hypothesis
+↓
+Experiment-oriented Planning
+↓
+Validation Authority
+↓
+Explicit Decision Semantics
+↓
+Semantic Evaluation
+↓
+Outcome Traceability
+```
 
 ---
 
@@ -596,20 +750,127 @@ The next cycle must be justified by real capability gaps observed in the evidenc
 
 ## Phase 2 — Causal Integrity Gate
 
-Phase 2 tamamlanmış sayılmadan önce şu kontrol geçmelidir:
+Result:
 
-> Causal Integrity Gate must pass.
+```text
+PASS
+```
 
-Aynı Signal için güçlü destekleyici kanıt ile güçlü çelişkili kanıt, materially different evaluation üretmelidir.
+Materially different credible evidence produces materially different evaluation and decision trajectories.
 
 ---
 
 ## Phase 5 — Holdout / Adversarial Evaluation Gate
 
-Phase 5 tamamlanmış sayılmadan önce şu kontrol geçmelidir:
+Initial holdout result:
 
-> Holdout / Adversarial Evaluation Gate must pass.
+```text
+5 / 5 PASS
+```
 
-Development cases ile final evaluation cases ayrı tutulmalıdır.
+Development and holdout cases remain conceptually separated.
 
-Sistem yalnızca geliştirme sırasında gördüğü örneklere uyum sağlamamalı; daha önce görmediği holdout/adversarial vakalarda da aynı reasoning principles korunmalıdır.
+The initial holdout result was obtained without production tuning against those holdout cases.
+
+---
+
+# Final Cycle Verification
+
+Recorded final verification before freeze:
+
+```text
+Semantic Development:
+9 / 9 PASS
+
+Holdout Regression:
+5 / 5 PASS
+
+Full Software Regression:
+244 / 244 PASS
+```
+
+Software correctness, semantic decision behavior, and real-world outcome success remain separate claims.
+
+---
+
+# Known Limitations at Cycle Close
+
+The cycle closes with explicit limitations:
+
+1. LLM / ResearchProvider output is not independently verified real-world research.
+2. Evidence confidence is a bounded system representation, not objective truth.
+3. Strategy thresholds remain deterministic scaffolding rather than learned truth.
+4. Planning remains domain-agnostic.
+5. Some measurements may legitimately be NOT_COMPARABLE.
+6. Some outcomes may legitimately remain INCONCLUSIVE.
+7. Outcome history is not autonomous learning.
+8. Persistent memory does not automatically alter future decisions.
+9. No engineering/prototype execution layer exists yet.
+10. No continuous autonomous Studio operation exists.
+11. Semantic tests demonstrate behavior within tested scenarios, not general intelligence.
+12. Real-project validation remains necessary before claims about practical end-to-end Studio effectiveness.
+
+These limitations are preserved for the mandatory external reality review.
+
+---
+
+# STOP / REVIEW Rule
+
+After the final Git checkpoint:
+
+```text
+EVIDENCE & DECISION INTEGRITY CYCLE COMPLETE
+↓
+FREEZE
+↓
+STOP
+```
+
+Do not automatically begin another expansion cycle.
+
+Do not automatically add:
+
+* New workers
+* New tools
+* More autonomy
+* More architectural layers
+
+Perform a new external reality review first.
+
+The next development cycle must be justified by concrete capability gaps relative to the intended final AI-RD-Studio.
+
+---
+
+# Final Status
+
+Phases:
+
+```text
+Phase 1 — Evidence & Provenance Foundation          COMPLETE
+Phase 2 — Research → Strategy Causal Link           COMPLETE
+Phase 3 — Hypothesis / Experiment / Semantics       COMPLETE
+Phase 4 — Validation as a Real Decision Gate        COMPLETE
+Phase 5 — Semantic Evaluation Suite                 COMPLETE
+Phase 6 — Outcome Feedback + Stabilization          COMPLETE
+```
+
+Cycle status:
+
+```text
+TECHNICAL WORK COMPLETE
+FINAL GIT CHECKPOINT PENDING
+```
+
+After the clean Git checkpoint:
+
+```text
+CYCLE COMPLETE — FROZEN
+```
+
+---
+
+# Final Principle
+
+> Improve the trustworthiness of Studio decisions before increasing the size or autonomy of the Studio.
+
+

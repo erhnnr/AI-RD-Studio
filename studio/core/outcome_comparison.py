@@ -2,7 +2,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from studio.core.experiment import Measurement
+from studio.core.experiment import (
+    Measurement,
+    MeasurementDirection,
+)
 from studio.core.outcome import OutcomeObservation
 
 
@@ -59,6 +62,17 @@ def compare_measurement_to_observation(
             ),
         )
 
+    if measurement.direction is None:
+        return OutcomeComparison(
+            metric=measurement.metric,
+            status=ComparisonStatus.NOT_COMPARABLE,
+            expected_target=measurement.target,
+            observed_value=observation.observed_value,
+            reason=(
+                "Measurement has no explicit target direction."
+            ),
+        )
+
     if not isinstance(
         observation.observed_value,
         (int, float),
@@ -85,15 +99,43 @@ def compare_measurement_to_observation(
             ),
         )
 
-    if float(observation.observed_value) >= measurement.target:
+    observed = float(
+        observation.observed_value
+    )
+
+    target = float(
+        measurement.target
+    )
+
+    if measurement.direction == MeasurementDirection.AT_LEAST:
+        met = observed >= target
+
+    elif measurement.direction == MeasurementDirection.AT_MOST:
+        met = observed <= target
+
+    elif measurement.direction == MeasurementDirection.EXACT:
+        met = observed == target
+
+    else:
+        return OutcomeComparison(
+            metric=measurement.metric,
+            status=ComparisonStatus.NOT_COMPARABLE,
+            expected_target=measurement.target,
+            observed_value=observation.observed_value,
+            reason=(
+                "Measurement direction is unsupported."
+            ),
+        )
+
+    if met:
         return OutcomeComparison(
             metric=measurement.metric,
             status=ComparisonStatus.MET,
             expected_target=measurement.target,
             observed_value=observation.observed_value,
             reason=(
-                "Observed numeric value meets or exceeds "
-                "the configured target."
+                "Observed numeric value satisfies "
+                "the configured target direction."
             ),
         )
 
@@ -103,7 +145,7 @@ def compare_measurement_to_observation(
         expected_target=measurement.target,
         observed_value=observation.observed_value,
         reason=(
-            "Observed numeric value is below "
-            "the configured target."
+            "Observed numeric value does not satisfy "
+            "the configured target direction."
         ),
     )

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
+from uuid import uuid4
 
 from studio.core.evidence import Claim
 from studio.core.experiment import Experiment, Hypothesis
@@ -53,7 +54,9 @@ class ResearchResult:
 
     def __post_init__(self) -> None:
         if not isinstance(self.claims, list):
-            raise TypeError("ResearchResult.claims must be a list.")
+            raise TypeError(
+                "ResearchResult.claims must be a list."
+            )
 
         for claim in self.claims:
             if not isinstance(claim, Claim):
@@ -126,4 +129,13 @@ class PipelineResult:
     knowledge: KnowledgeRecord
     planning_result: Optional[PlanningResult] = None
     validation_result: Optional[ValidationResult] = None
+    trace_id: str = field(
+        default_factory=lambda: uuid4().hex
+    )
     created_at: datetime = field(default_factory=datetime.now)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.trace_id, str) or not self.trace_id.strip():
+            raise ValueError(
+                "PipelineResult.trace_id must be a non-empty string."
+            )
