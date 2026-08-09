@@ -1,5 +1,7 @@
 from studio.workers.strategy_worker import StrategyWorker
 from studio.workers.research_worker import ResearchWorker
+from studio.workers.planning_worker import PlanningWorker
+from studio.workers.validation_worker import ValidationWorker
 
 
 class WorkerRegistry:
@@ -16,6 +18,8 @@ class WorkerRegistry:
             "research": ResearchWorker(
                 provider=research_provider
             ),
+            "planning": PlanningWorker(),
+            "validation": ValidationWorker(),
         }
 
     def get(self, worker_name: str):
