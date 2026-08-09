@@ -29,7 +29,7 @@ class StudioOrchestrator:
 
     def _run_pipeline(self, signal: Signal):
         """
-        Run the complete Studio pipeline and return all intermediate results.
+        Run the complete Studio multi-worker pipeline.
         """
 
         RuntimeGuard.validate_signal(signal)
@@ -56,12 +56,10 @@ class StudioOrchestrator:
             "research",
         )
 
-        research_context = WorkerContext(
-            signal=signal
-        )
-
         research_result = research_worker.execute(
-            research_context
+            WorkerContext(
+                signal=signal
+            )
         )
 
         RuntimeGuard.validate_research_result(
@@ -99,7 +97,67 @@ class StudioOrchestrator:
         )
 
         # -------------------------------------------------
-        # 3. Review
+        # 3. Planning
+        # -------------------------------------------------
+
+        planning_worker = (
+            self.worker_registry.find_by_contract(
+                capability="planning",
+                input_type="Opportunity",
+                output_type="PlanningResult",
+            )
+        )
+
+        if planning_worker is None:
+            planning_worker = self.worker_registry.get(
+                "planning"
+            )
+
+        RuntimeGuard.require_worker(
+            planning_worker,
+            "planning",
+        )
+
+        planning_result = planning_worker.execute(
+            opportunity
+        )
+
+        RuntimeGuard.validate_planning_result(
+            planning_result
+        )
+
+        # -------------------------------------------------
+        # 4. Validation
+        # -------------------------------------------------
+
+        validation_worker = (
+            self.worker_registry.find_by_contract(
+                capability="validation",
+                input_type="PlanningResult",
+                output_type="ValidationResult",
+            )
+        )
+
+        if validation_worker is None:
+            validation_worker = self.worker_registry.get(
+                "validation"
+            )
+
+        RuntimeGuard.require_worker(
+            validation_worker,
+            "validation",
+        )
+
+        validation_result = validation_worker.execute(
+            planning_result
+        )
+
+        RuntimeGuard.validate_validation_result(
+            validation_result
+        )
+
+        # -------------------------------------------------
+        # 5. Review
         # -------------------------------------------------
 
         decision = self.review_board.evaluate(
@@ -111,7 +169,7 @@ class StudioOrchestrator:
         )
 
         # -------------------------------------------------
-        # 4. Task
+        # 6. Task
         # -------------------------------------------------
 
         task = None
@@ -142,7 +200,7 @@ class StudioOrchestrator:
             )
 
         # -------------------------------------------------
-        # 5. Knowledge
+        # 7. Knowledge
         # -------------------------------------------------
 
         knowledge = self.knowledge_writer.write(
@@ -161,6 +219,8 @@ class StudioOrchestrator:
         return (
             research_result,
             opportunity,
+            planning_result,
+            validation_result,
             decision,
             task,
             knowledge,
@@ -168,12 +228,15 @@ class StudioOrchestrator:
 
     def execute(self, signal: Signal):
         """
-        Execute the Studio pipeline and return the final knowledge record.
+        Execute the Studio pipeline and return
+        the final knowledge record.
         """
 
         (
             research_result,
             opportunity,
+            planning_result,
+            validation_result,
             decision,
             task,
             knowledge,
@@ -186,12 +249,15 @@ class StudioOrchestrator:
         signal: Signal,
     ) -> PipelineResult:
         """
-        Execute the Studio pipeline and return the complete runtime trace.
+        Execute the Studio pipeline and return
+        the complete runtime trace.
         """
 
         (
             research_result,
             opportunity,
+            planning_result,
+            validation_result,
             decision,
             task,
             knowledge,
@@ -204,6 +270,8 @@ class StudioOrchestrator:
             decision=decision,
             task=task,
             knowledge=knowledge,
+            planning_result=planning_result,
+            validation_result=validation_result,
         )
 
     def execute_project(

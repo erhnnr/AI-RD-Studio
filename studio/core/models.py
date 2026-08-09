@@ -124,4 +124,6 @@ class PipelineResult:
     decision: object
     task: Optional[ResearchTask]
     knowledge: KnowledgeRecord
+    planning_result: Optional[PlanningResult] = None
+    validation_result: Optional[ValidationResult] = None
     created_at: datetime = field(default_factory=datetime.now)

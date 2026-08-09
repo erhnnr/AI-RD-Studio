@@ -1,9 +1,11 @@
 from studio.core.models import (
     KnowledgeRecord,
     Opportunity,
+    PlanningResult,
     ResearchResult,
     ResearchTask,
     Signal,
+    ValidationResult,
 )
 
 
@@ -76,6 +78,36 @@ class RuntimeGuard:
         if opportunity.signal is None:
             raise RuntimeValidationError(
                 "Opportunity must contain a Signal."
+            )
+
+    @staticmethod
+    def validate_planning_result(
+        result: PlanningResult,
+    ) -> None:
+
+        if not isinstance(result, PlanningResult):
+            raise RuntimeValidationError(
+                "Planning worker must return PlanningResult."
+            )
+
+        if result.opportunity is None:
+            raise RuntimeValidationError(
+                "PlanningResult must contain an Opportunity."
+            )
+
+    @staticmethod
+    def validate_validation_result(
+        result: ValidationResult,
+    ) -> None:
+
+        if not isinstance(result, ValidationResult):
+            raise RuntimeValidationError(
+                "Validation worker must return ValidationResult."
+            )
+
+        if result.planning_result is None:
+            raise RuntimeValidationError(
+                "ValidationResult must contain PlanningResult."
             )
 
     @staticmethod
