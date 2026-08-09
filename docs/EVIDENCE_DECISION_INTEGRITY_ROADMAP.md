@@ -590,3 +590,26 @@ Perform a new external review first.
 The next cycle must be justified by real capability gaps observed in the evidence-driven Studio.
 
 
+---
+
+# Evaluation Checkpoints
+
+## Phase 2 — Causal Integrity Gate
+
+Phase 2 tamamlanmış sayılmadan önce şu kontrol geçmelidir:
+
+> Causal Integrity Gate must pass.
+
+Aynı Signal için güçlü destekleyici kanıt ile güçlü çelişkili kanıt, materially different evaluation üretmelidir.
+
+---
+
+## Phase 5 — Holdout / Adversarial Evaluation Gate
+
+Phase 5 tamamlanmış sayılmadan önce şu kontrol geçmelidir:
+
+> Holdout / Adversarial Evaluation Gate must pass.
+
+Development cases ile final evaluation cases ayrı tutulmalıdır.
+
+Sistem yalnızca geliştirme sırasında gördüğü örneklere uyum sağlamamalı; daha önce görmediği holdout/adversarial vakalarda da aynı reasoning principles korunmalıdır.

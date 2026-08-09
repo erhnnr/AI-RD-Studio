@@ -723,4 +723,65 @@ When there is uncertainty about what to build next, use this rule:
 
 > Improve the trustworthiness of Studio decisions before increasing the size or autonomy of the Studio.
 
+---
 
+# Evaluation Integrity Rules
+
+## Rule 51 — Phase 2 Requires a Causal Integrity Gate
+
+Phase 2 yalnızca StrategyWorker evidence alanlarını okuyor diye tamamlanmış sayılmaz.
+
+Studio, materially different credible evidence'ın materially different evaluation üretebildiğini göstermelidir.
+
+---
+
+## Rule 52 — Relevant Changes Must Matter
+
+Güçlü destekleyici evidence ile güçlü çelişkili evidence aynı sonucu üretmemelidir.
+
+Material evidence değişikliği reasoning ve decision trajectory üzerinde etkili olmalıdır.
+
+---
+
+## Rule 53 — Irrelevant Changes Should Not Matter
+
+Yalnızca kelime, etiket veya yüzeysel ifade değişiklikleri decision üzerinde belirleyici olmamalıdır.
+
+Özellikle "AI" gibi etiketler tek başına stratejik değer oluşturmamalıdır.
+
+---
+
+## Rule 54 — Development and Holdout Cases Must Remain Separate
+
+Development sırasında kullanılan semantic cases ile final holdout/adversarial cases ayrı tutulmalıdır.
+
+Aynı örnek hem tuning amacıyla kullanılıp hem de generalization kanıtı olarak gösterilemez.
+
+---
+
+## Rule 55 — Phase 5 Requires a Holdout / Adversarial Gate
+
+Phase 5 yalnızca bilinen benchmark vakaları geçti diye tamamlanmış sayılmaz.
+
+Studio daha önce development sırasında kullanılmamış vakalarda da aynı reasoning principles'ı korumalıdır.
+
+---
+
+## Rule 56 — Do Not Tune Directly to Holdout Cases
+
+Bir holdout case başarısız olduğunda yalnızca o örneği geçirmek için özel kural yazılmamalıdır.
+
+Önce underlying reasoning veya architecture problemi bulunmalıdır.
+
+Bir holdout case doğrudan development hedefi haline gelirse artık pristine holdout olarak kabul edilmez.
+
+---
+
+## Rule 57 — Software Correctness and Decision Quality Are Different
+
+Şu üç iddia birbirinden ayrıdır:
+
+```text
+The code works.
+The reasoning behaves appropriately.
+The decision worked in reality.
