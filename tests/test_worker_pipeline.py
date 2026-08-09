@@ -1,10 +1,9 @@
-from studio.core.models import Signal, ResearchResult, Opportunity
+from studio.core.models import Opportunity, ResearchResult, Signal
 from studio.core.worker_context import WorkerContext
 from studio.workers.strategy_worker import StrategyWorker
 
 
 def test_strategy_worker_consumes_research_result_from_context():
-
     signal = Signal(
         title="AI infrastructure opportunity",
         description="New AI infrastructure demand detected.",
@@ -12,7 +11,7 @@ def test_strategy_worker_consumes_research_result_from_context():
     )
 
     research_result = ResearchResult(
-        analysis="Strong growth potential detected.",
+        analysis="Research exists but contains no structured evidence.",
         signal=signal,
     )
 
@@ -26,15 +25,17 @@ def test_strategy_worker_consumes_research_result_from_context():
 
     assert isinstance(result, Opportunity)
     assert result.signal is signal
-    assert result.impact == 9
-    assert result.urgency == 8
-    assert result.feasibility == 8
-    assert result.strategic_fit == 10
-    assert result.score == 35
+
+    # No structured evidence means the StrategyWorker
+    # must remain at the neutral baseline.
+    assert result.impact == 5
+    assert result.urgency == 5
+    assert result.feasibility == 5
+    assert result.strategic_fit == 5
+    assert result.score == 20
 
 
 def test_strategy_worker_declares_research_result_contract():
-
     worker = StrategyWorker()
 
     metadata = worker.get_metadata()

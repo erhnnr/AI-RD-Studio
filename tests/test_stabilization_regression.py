@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from studio.core.models import Signal
@@ -7,13 +9,19 @@ from studio.runtime.orchestrator import StudioOrchestrator
 from studio.runtime.runtime_guard import RuntimeValidationError
 
 
-def test_full_accept_pipeline_remains_stable():
-
+def test_controlled_accept_pipeline_remains_stable():
     orchestrator = StudioOrchestrator()
 
+    orchestrator.review_board.evaluate = lambda opportunity: SimpleNamespace(
+        decision="ACCEPT",
+        reason="Controlled acceptance.",
+        confidence=100,
+        next_action="CREATE_TASK",
+    )
+
     signal = Signal(
-        title="AI infrastructure opportunity",
-        description="AI infrastructure demand is increasing.",
+        title="Infrastructure opportunity",
+        description="Controlled accepted opportunity.",
         source="Market",
     )
 
@@ -32,14 +40,13 @@ def test_full_accept_pipeline_remains_stable():
     assert result.knowledge is not None
 
 
-def test_full_reject_pipeline_remains_stable():
-
+def test_default_unverified_pipeline_does_not_auto_accept():
     orchestrator = StudioOrchestrator()
 
     signal = Signal(
-        title="Small idea",
-        description="Low strategic value.",
-        source="Internal",
+        title="AI infrastructure opportunity",
+        description="Unverified input signal.",
+        source="Market",
     )
 
     result = orchestrator.execute_with_trace(
@@ -51,31 +58,52 @@ def test_full_reject_pipeline_remains_stable():
     assert result.knowledge is not None
 
 
-def test_project_pipeline_remains_stable():
-
+def test_project_pipeline_remains_stable_with_controlled_decisions():
     project = Project(
         name="Stabilization Project",
         objective="Validate project execution",
         priority="HIGH",
     )
 
+    accepted_signal = Signal(
+        title="Primary opportunity",
+        description="Controlled accepted signal.",
+        source="Market",
+    )
+
+    rejected_signal = Signal(
+        title="Secondary opportunity",
+        description="Controlled rejected signal.",
+        source="Internal",
+    )
+
     context = ProjectContext(
         project=project,
         signals=[
-            Signal(
-                title="AI opportunity",
-                description="High value AI signal.",
-                source="Market",
-            ),
-            Signal(
-                title="Small idea",
-                description="Low value signal.",
-                source="Internal",
-            ),
+            accepted_signal,
+            rejected_signal,
         ],
     )
 
     orchestrator = StudioOrchestrator()
+
+    def controlled_evaluate(opportunity):
+        if opportunity.signal is accepted_signal:
+            return SimpleNamespace(
+                decision="ACCEPT",
+                reason="Controlled acceptance.",
+                confidence=100,
+                next_action="CREATE_TASK",
+            )
+
+        return SimpleNamespace(
+            decision="REJECT",
+            reason="Controlled rejection.",
+            confidence=100,
+            next_action="STOP",
+        )
+
+    orchestrator.review_board.evaluate = controlled_evaluate
 
     execution = orchestrator.execute_project(
         context
@@ -89,7 +117,6 @@ def test_project_pipeline_remains_stable():
 
 
 def test_missing_signal_remains_controlled():
-
     orchestrator = StudioOrchestrator()
 
     with pytest.raises(

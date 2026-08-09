@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from studio.core.models import PipelineResult, Signal
 from studio.core.project import Project
 from studio.core.project_context import ProjectContext
@@ -6,7 +8,6 @@ from studio.runtime.orchestrator import StudioOrchestrator
 
 
 def test_orchestrator_executes_all_project_signals():
-
     project = Project(
         name="AI Education Platform",
         objective="Build an AI learning platform",
@@ -69,7 +70,6 @@ def test_orchestrator_executes_all_project_signals():
 
 
 def test_project_execution_with_no_signals_returns_empty_result():
-
     project = Project(
         name="Empty Project",
         objective="Test empty execution",
@@ -99,23 +99,22 @@ def test_project_execution_with_no_signals_returns_empty_result():
     assert execution.status == "NO_SIGNALS"
 
 
-def test_project_execution_provides_summary():
-
+def test_project_execution_provides_summary_from_controlled_decisions():
     project = Project(
-        name="AI Research Project",
-        objective="Evaluate AI opportunities",
+        name="Research Project",
+        objective="Evaluate opportunities",
         priority="HIGH",
     )
 
     accepted_signal = Signal(
-        title="AI infrastructure opportunity",
-        description="Strong AI infrastructure demand.",
+        title="Infrastructure opportunity",
+        description="Controlled accepted case.",
         source="Market",
     )
 
     rejected_signal = Signal(
-        title="Small idea",
-        description="Low strategic value.",
+        title="Secondary opportunity",
+        description="Controlled rejected case.",
         source="Internal",
     )
 
@@ -128,6 +127,24 @@ def test_project_execution_provides_summary():
     )
 
     orchestrator = StudioOrchestrator()
+
+    def controlled_evaluate(opportunity):
+        if opportunity.signal is accepted_signal:
+            return SimpleNamespace(
+                decision="ACCEPT",
+                reason="Controlled acceptance.",
+                confidence=100,
+                next_action="CREATE_TASK",
+            )
+
+        return SimpleNamespace(
+            decision="REJECT",
+            reason="Controlled rejection.",
+            confidence=100,
+            next_action="STOP",
+        )
+
+    orchestrator.review_board.evaluate = controlled_evaluate
 
     execution = orchestrator.execute_project(
         context

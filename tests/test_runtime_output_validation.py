@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from studio.core.models import Signal
@@ -6,16 +8,14 @@ from studio.runtime.runtime_guard import RuntimeValidationError
 
 
 def create_signal():
-
     return Signal(
-        title="AI infrastructure opportunity",
-        description="AI infrastructure demand is increasing.",
+        title="Infrastructure opportunity",
+        description="Controlled opportunity.",
         source="Market",
     )
 
 
 def test_orchestrator_rejects_invalid_decision_output():
-
     orchestrator = StudioOrchestrator()
 
     def invalid_evaluate(opportunity):
@@ -37,8 +37,14 @@ def test_orchestrator_rejects_invalid_decision_output():
 
 
 def test_orchestrator_rejects_invalid_task_output():
-
     orchestrator = StudioOrchestrator()
+
+    orchestrator.review_board.evaluate = lambda opportunity: SimpleNamespace(
+        decision="ACCEPT",
+        reason="Controlled acceptance.",
+        confidence=100,
+        next_action="CREATE_TASK",
+    )
 
     def invalid_create_task(
         opportunity,
@@ -62,7 +68,6 @@ def test_orchestrator_rejects_invalid_task_output():
 
 
 def test_orchestrator_rejects_invalid_knowledge_output():
-
     orchestrator = StudioOrchestrator()
 
     def invalid_write(
