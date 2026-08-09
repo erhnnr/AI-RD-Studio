@@ -75,6 +75,19 @@ class PlanningResult:
 
 
 @dataclass
+class ValidationResult:
+    """
+    Structured validation result produced from a plan.
+    """
+
+    planning_result: PlanningResult
+    valid: bool
+    reason: str
+    worker: str = "ValidationWorker"
+    created_at: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
 class KnowledgeRecord:
     """
     Permanent Studio memory entry.
