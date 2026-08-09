@@ -1,6 +1,8 @@
-from studio.workers.base import BaseWorker
-from studio.core.worker_context import WorkerContext
+from studio.core.evidence import EvidenceAssessmentState
+from studio.core.evidence_assessment import assess_research_evidence
 from studio.core.models import Opportunity, ResearchResult
+from studio.core.worker_context import WorkerContext
+from studio.workers.base import BaseWorker
 
 
 class StrategyWorker(BaseWorker):
@@ -28,16 +30,51 @@ class StrategyWorker(BaseWorker):
             "Opportunity",
         ]
 
+    def _neutral_scores(self) -> tuple[int, int, int, int]:
+        return 5, 5, 5, 5
+
+    def _scores_from_research(
+        self,
+        research_result: ResearchResult,
+    ) -> tuple[int, int, int, int]:
+        assessment = assess_research_evidence(
+            research_result
+        )
+
+        impact, urgency, feasibility, strategic_fit = (
+            self._neutral_scores()
+        )
+
+        if assessment.state == EvidenceAssessmentState.SUPPORTING:
+            impact += 1
+            feasibility += 1
+            strategic_fit += 1
+
+        elif assessment.state == EvidenceAssessmentState.CONTRADICTORY:
+            impact -= 1
+            feasibility -= 1
+            strategic_fit -= 1
+
+        return (
+            impact,
+            urgency,
+            feasibility,
+            strategic_fit,
+        )
+
     def execute(self, context) -> Opportunity:
 
-        if isinstance(context, WorkerContext):
+        research_result = None
 
+        if isinstance(context, WorkerContext):
             if context.research_result is not None:
-                signal = context.research_result.signal
+                research_result = context.research_result
+                signal = research_result.signal
             else:
                 signal = context.signal
 
         elif isinstance(context, ResearchResult):
+            research_result = context
             signal = context.signal
 
         else:
@@ -49,18 +86,22 @@ class StrategyWorker(BaseWorker):
                 "or ResearchResult containing a Signal."
             )
 
-        title = signal.title.lower()
-
-        if "ai" in title:
-            impact = 9
-            urgency = 8
-            feasibility = 8
-            strategic_fit = 10
+        if research_result is not None:
+            (
+                impact,
+                urgency,
+                feasibility,
+                strategic_fit,
+            ) = self._scores_from_research(
+                research_result
+            )
         else:
-            impact = 5
-            urgency = 5
-            feasibility = 5
-            strategic_fit = 5
+            (
+                impact,
+                urgency,
+                feasibility,
+                strategic_fit,
+            ) = self._neutral_scores()
 
         return Opportunity(
             signal=signal,
