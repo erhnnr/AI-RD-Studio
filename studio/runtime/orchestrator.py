@@ -14,10 +14,17 @@ class StudioOrchestrator:
     Coordinates the Studio research and decision workflow.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        research_provider=None,
+    ):
         self.task_manager = TaskManager()
         self.knowledge_writer = KnowledgeWriter()
-        self.worker_registry = WorkerRegistry()
+
+        self.worker_registry = WorkerRegistry(
+            research_provider=research_provider
+        )
+
         self.review_board = ReviewBoard()
 
     def _run_pipeline(self, signal: Signal):

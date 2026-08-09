@@ -7,10 +7,15 @@ class WorkerRegistry:
     Registry for Studio workers.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        research_provider=None,
+    ):
         self.workers = {
             "strategy": StrategyWorker(),
-            "research": ResearchWorker(),
+            "research": ResearchWorker(
+                provider=research_provider
+            ),
         }
 
     def get(self, worker_name: str):
