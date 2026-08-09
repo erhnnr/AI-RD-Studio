@@ -2,13 +2,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
 
+from studio.core.evidence import Claim
+
 
 @dataclass
 class Signal:
-    """
-    External world observation.
-    """
-
     title: str
     description: str
     source: str
@@ -17,10 +15,6 @@ class Signal:
 
 @dataclass
 class Opportunity:
-    """
-    Evaluated signal that may create value.
-    """
-
     signal: Signal
     impact: int
     urgency: int
@@ -39,10 +33,6 @@ class Opportunity:
 
 @dataclass
 class ResearchTask:
-    """
-    Task generated from an opportunity.
-    """
-
     opportunity: Opportunity
     objective: str
     status: str = "NEW"
@@ -50,23 +40,26 @@ class ResearchTask:
 
 @dataclass
 class ResearchResult:
-    """
-    Structured result produced by a research worker.
-    """
-
     analysis: str
     worker: str = "ResearchWorker"
     signal: Optional[Signal] = None
     project_name: Optional[str] = None
+    claims: List[Claim] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.claims, list):
+            raise TypeError("ResearchResult.claims must be a list.")
+
+        for claim in self.claims:
+            if not isinstance(claim, Claim):
+                raise TypeError(
+                    "ResearchResult.claims must contain Claim objects."
+                )
 
 
 @dataclass
 class PlanningResult:
-    """
-    Structured execution plan produced from an opportunity.
-    """
-
     opportunity: Opportunity
     objective: str
     steps: List[str] = field(default_factory=list)
@@ -76,10 +69,6 @@ class PlanningResult:
 
 @dataclass
 class ValidationResult:
-    """
-    Structured validation result produced from a plan.
-    """
-
     planning_result: PlanningResult
     valid: bool
     reason: str
@@ -89,10 +78,6 @@ class ValidationResult:
 
 @dataclass
 class KnowledgeRecord:
-    """
-    Permanent Studio memory entry.
-    """
-
     title: str
     content: str
     tags: List[str] = field(default_factory=list)
@@ -101,10 +86,6 @@ class KnowledgeRecord:
 
 @dataclass
 class DecisionRecord:
-    """
-    Permanent record of strategic decisions.
-    """
-
     decision: str
     reason: str
     confidence: int
@@ -114,10 +95,6 @@ class DecisionRecord:
 
 @dataclass
 class PipelineResult:
-    """
-    Complete trace of a Studio runtime pipeline execution.
-    """
-
     signal: Signal
     research_result: ResearchResult
     opportunity: Opportunity

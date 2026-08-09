@@ -1,10 +1,11 @@
 from typing import Optional
 
-from studio.workers.base import BaseWorker
-from studio.workers.research_provider import ResearchProvider
+from studio.core.evidence import Claim, Evidence, EvidenceSource
+from studio.core.models import ResearchResult
 from studio.core.project import Project
 from studio.core.worker_context import WorkerContext
-from studio.core.models import ResearchResult
+from studio.workers.base import BaseWorker
+from studio.workers.research_provider import ResearchProvider
 
 
 class ResearchWorker(BaseWorker):
@@ -36,6 +37,44 @@ class ResearchWorker(BaseWorker):
             "ResearchResult",
         ]
 
+    def _build_signal_claims(self, signal) -> list[Claim]:
+        """
+        Build a minimal structured claim from the input Signal.
+
+        The Signal itself is treated as unverified input evidence.
+        This does not imply independent verification.
+        """
+
+        source = EvidenceSource(
+            name=signal.source,
+            source_type="signal_input",
+            reference=None,
+            metadata="Original source declared by the input Signal.",
+        )
+
+        evidence = Evidence(
+            content=signal.description,
+            source=source,
+            confidence=0.3,
+            provenance_note=(
+                "Derived directly from the input Signal. "
+                "Not independently verified."
+            ),
+        )
+
+        claim = Claim(
+            statement=signal.title,
+            supporting_evidence=[evidence],
+            counter_evidence=[],
+            confidence=0.3,
+            uncertainty=(
+                "The claim is based only on the original Signal "
+                "and has not yet been independently verified."
+            ),
+        )
+
+        return [claim]
+
     def execute(self, context) -> ResearchResult:
 
         if isinstance(context, WorkerContext):
@@ -43,13 +82,8 @@ class ResearchWorker(BaseWorker):
             signal = context.signal
 
             if self.provider is not None:
-
-                analysis = self.provider.research(
-                    signal
-                )
-
+                analysis = self.provider.research(signal)
             else:
-
                 analysis = (
                     f"Research analysis prepared for "
                     f"{signal.title}"
@@ -59,6 +93,7 @@ class ResearchWorker(BaseWorker):
                 worker=self.name,
                 signal=signal,
                 analysis=analysis,
+                claims=self._build_signal_claims(signal),
             )
 
         if isinstance(context, Project):
