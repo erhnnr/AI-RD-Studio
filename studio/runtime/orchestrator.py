@@ -1,12 +1,12 @@
 from studio.core.models import PipelineResult, Signal
 from studio.core.project_context import ProjectContext
 from studio.core.project_execution_result import ProjectExecutionResult
-from studio.core.review_board import ReviewBoard
+from studio.core.review_board import ReviewBoard, ReviewDecision
+from studio.core.worker_context import WorkerContext
+from studio.knowledge.writer import KnowledgeWriter
 from studio.runtime.runtime_guard import RuntimeGuard
 from studio.runtime.task_manager import TaskManager
-from studio.knowledge.writer import KnowledgeWriter
 from studio.workers.registry import WorkerRegistry
-from studio.core.worker_context import WorkerContext
 
 
 class StudioOrchestrator:
@@ -26,6 +26,37 @@ class StudioOrchestrator:
         )
 
         self.review_board = ReviewBoard()
+
+    def _decision_from_validation_failure(
+        self,
+        opportunity,
+        validation_result,
+    ) -> ReviewDecision:
+        """
+        Convert an authoritative validation failure into a
+        non-ACCEPT progression decision.
+        """
+
+        if opportunity.evidence_state == "CONTRADICTORY":
+            return ReviewDecision(
+                decision="REJECT",
+                reason=(
+                    "Validation blocked progression: "
+                    f"{validation_result.reason}"
+                ),
+                confidence=85,
+                next_action="Do not allocate resources",
+            )
+
+        return ReviewDecision(
+            decision="DEFER",
+            reason=(
+                "Validation blocked progression: "
+                f"{validation_result.reason}"
+            ),
+            confidence=70,
+            next_action="Resolve validation failure before progression",
+        )
 
     def _run_pipeline(self, signal: Signal):
         """
@@ -157,12 +188,18 @@ class StudioOrchestrator:
         )
 
         # -------------------------------------------------
-        # 5. Review
+        # 5. Validation Gate + Review
         # -------------------------------------------------
 
-        decision = self.review_board.evaluate(
-            opportunity
-        )
+        if validation_result.valid:
+            decision = self.review_board.evaluate(
+                opportunity
+            )
+        else:
+            decision = self._decision_from_validation_failure(
+                opportunity,
+                validation_result,
+            )
 
         RuntimeGuard.validate_decision(
             decision

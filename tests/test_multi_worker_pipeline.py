@@ -7,7 +7,6 @@ from studio.runtime.orchestrator import StudioOrchestrator
 
 
 def test_orchestrator_runs_planning_and_validation_workers():
-
     orchestrator = StudioOrchestrator()
 
     signal = Signal(
@@ -40,11 +39,15 @@ def test_orchestrator_runs_planning_and_validation_workers():
         is result.planning_result
     )
 
-    assert result.validation_result.valid is True
+    # Default signal-derived evidence is intentionally
+    # unverified and insufficient for progression.
+    assert result.validation_result.valid is False
+    assert result.opportunity.evidence_state == "INSUFFICIENT"
+    assert result.decision.decision == "DEFER"
+    assert result.task is None
 
 
 def test_multi_worker_pipeline_preserves_full_trace():
-
     orchestrator = StudioOrchestrator()
 
     signal = Signal(

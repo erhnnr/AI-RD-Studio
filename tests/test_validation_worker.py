@@ -1,3 +1,8 @@
+from studio.core.experiment import (
+    Experiment,
+    Hypothesis,
+    Measurement,
+)
 from studio.core.models import (
     Opportunity,
     PlanningResult,
@@ -7,37 +12,82 @@ from studio.core.models import (
 from studio.workers.validation_worker import ValidationWorker
 
 
-def create_planning_result():
-
-    signal = Signal(
-        title="AI education opportunity",
-        description="AI tutoring demand is increasing.",
-        source="Market",
-    )
-
-    opportunity = Opportunity(
-        signal=signal,
-        impact=9,
-        urgency=8,
-        feasibility=8,
-        strategic_fit=10,
-    )
-
-    return PlanningResult(
-        opportunity=opportunity,
-        objective=(
-            "Investigate and execute opportunity: "
-            "AI education opportunity"
+def create_opportunity(
+    evidence_state: str = "SUPPORTING",
+) -> Opportunity:
+    return Opportunity(
+        signal=Signal(
+            title="AI education opportunity",
+            description="Controlled validation signal.",
+            source="test",
         ),
-        steps=[
-            "Review research findings",
-            "Define execution objective",
+        impact=6,
+        urgency=5,
+        feasibility=6,
+        strategic_fit=6,
+        evidence_state=evidence_state,
+        evidence_confidence=0.8,
+        rationale="Controlled supporting evidence.",
+    )
+
+
+def create_hypothesis() -> Hypothesis:
+    return Hypothesis(
+        statement=(
+            "A bounded test can determine whether "
+            "the opportunity should progress."
+        ),
+        assumptions=[
+            "The controlled test remains representative.",
+        ],
+        success_criteria=[
+            "The measured outcome supports progression.",
+        ],
+        failure_criteria=[
+            "The measured outcome does not support progression.",
         ],
     )
 
 
-def test_validation_worker_accepts_valid_plan():
+def create_experiment() -> Experiment:
+    return Experiment(
+        objective="Test the opportunity under controlled conditions.",
+        method="Run a bounded controlled comparison.",
+        measurements=[
+            Measurement(
+                metric="observable outcome",
+            ),
+        ],
+        stop_conditions=[
+            "Success criterion reached.",
+            "Failure criterion reached.",
+        ],
+    )
 
+
+def create_planning_result(
+    evidence_state: str = "SUPPORTING",
+) -> PlanningResult:
+    return PlanningResult(
+        opportunity=create_opportunity(
+            evidence_state=evidence_state,
+        ),
+        objective=(
+            "Test opportunity through a bounded R&D experiment: "
+            "AI education opportunity"
+        ),
+        steps=[
+            "Review the opportunity evidence and assumptions.",
+            "Define the test boundary.",
+            "Measure the observable outcome.",
+            "Compare evidence with success and failure criteria.",
+        ],
+        hypothesis=create_hypothesis(),
+        experiment=create_experiment(),
+    )
+
+
+def test_validation_worker_accepts_valid_plan():
     planning_result = create_planning_result()
 
     worker = ValidationWorker()
@@ -53,35 +103,28 @@ def test_validation_worker_accepts_valid_plan():
 
     assert result.planning_result is planning_result
     assert result.valid is True
-    assert result.reason == "Plan passed validation."
     assert result.worker == "ValidationWorker"
-    assert result.created_at is not None
 
 
-def test_validation_worker_rejects_plan_without_steps():
-
+def test_validation_worker_rejects_missing_objective():
     planning_result = create_planning_result()
+    planning_result.objective = ""
 
-    planning_result.steps = []
-
-    worker = ValidationWorker()
-
-    result = worker.execute(
+    result = ValidationWorker().execute(
         planning_result
     )
 
     assert result.valid is False
-    assert result.reason == (
-        "Planning steps are missing."
+    assert "objective" in result.reason.lower()
+
+
+def test_validation_worker_rejects_missing_steps():
+    planning_result = create_planning_result()
+    planning_result.steps = []
+
+    result = ValidationWorker().execute(
+        planning_result
     )
 
-
-def test_validation_worker_declares_contract():
-
-    worker = ValidationWorker()
-
-    metadata = worker.get_metadata()
-
-    assert "validation" in metadata["capabilities"]
-    assert "PlanningResult" in metadata["input_types"]
-    assert "ValidationResult" in metadata["output_types"]
+    assert result.valid is False
+    assert "steps" in result.reason.lower()

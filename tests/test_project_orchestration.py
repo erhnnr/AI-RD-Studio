@@ -1,10 +1,31 @@
 from types import SimpleNamespace
 
-from studio.core.models import PipelineResult, Signal
+from studio.core.models import (
+    Opportunity,
+    PipelineResult,
+    Signal,
+)
 from studio.core.project import Project
 from studio.core.project_context import ProjectContext
 from studio.core.project_execution_result import ProjectExecutionResult
 from studio.runtime.orchestrator import StudioOrchestrator
+from studio.workers.strategy_worker import StrategyWorker
+
+
+def supporting_strategy(
+    self,
+    research_result,
+) -> Opportunity:
+    return Opportunity(
+        signal=research_result.signal,
+        impact=6,
+        urgency=5,
+        feasibility=6,
+        strategic_fit=6,
+        evidence_state="SUPPORTING",
+        evidence_confidence=0.9,
+        rationale="Controlled supporting evidence.",
+    )
 
 
 def test_orchestrator_executes_all_project_signals():
@@ -95,11 +116,14 @@ def test_project_execution_with_no_signals_returns_empty_result():
     assert execution.results == []
     assert execution.total_results == 0
     assert execution.accepted_count == 0
+    assert execution.deferred_count == 0
     assert execution.rejected_count == 0
     assert execution.status == "NO_SIGNALS"
 
 
-def test_project_execution_provides_summary_from_controlled_decisions():
+def test_project_execution_provides_summary_from_controlled_decisions(
+    monkeypatch,
+):
     project = Project(
         name="Research Project",
         objective="Evaluate opportunities",
@@ -124,6 +148,12 @@ def test_project_execution_provides_summary_from_controlled_decisions():
             accepted_signal,
             rejected_signal,
         ],
+    )
+
+    monkeypatch.setattr(
+        StrategyWorker,
+        "execute",
+        supporting_strategy,
     )
 
     orchestrator = StudioOrchestrator()
@@ -152,5 +182,6 @@ def test_project_execution_provides_summary_from_controlled_decisions():
 
     assert execution.total_results == 2
     assert execution.accepted_count == 1
+    assert execution.deferred_count == 0
     assert execution.rejected_count == 1
     assert execution.status == "COMPLETED"
