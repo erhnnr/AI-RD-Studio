@@ -36,7 +36,7 @@ class StrategyWorker(BaseWorker):
     def _scores_from_research(
         self,
         research_result: ResearchResult,
-    ) -> tuple[int, int, int, int]:
+    ):
         assessment = assess_research_evidence(
             research_result
         )
@@ -60,6 +60,7 @@ class StrategyWorker(BaseWorker):
             urgency,
             feasibility,
             strategic_fit,
+            assessment,
         )
 
     def execute(self, context) -> Opportunity:
@@ -86,15 +87,25 @@ class StrategyWorker(BaseWorker):
                 "or ResearchResult containing a Signal."
             )
 
+        evidence_state = None
+        evidence_confidence = None
+        rationale = None
+
         if research_result is not None:
             (
                 impact,
                 urgency,
                 feasibility,
                 strategic_fit,
+                assessment,
             ) = self._scores_from_research(
                 research_result
             )
+
+            evidence_state = assessment.state.value
+            evidence_confidence = assessment.confidence
+            rationale = assessment.rationale
+
         else:
             (
                 impact,
@@ -103,10 +114,18 @@ class StrategyWorker(BaseWorker):
                 strategic_fit,
             ) = self._neutral_scores()
 
+            rationale = (
+                "No ResearchResult was provided. "
+                "Neutral strategic baseline applied."
+            )
+
         return Opportunity(
             signal=signal,
             impact=impact,
             urgency=urgency,
             feasibility=feasibility,
             strategic_fit=strategic_fit,
+            evidence_state=evidence_state,
+            evidence_confidence=evidence_confidence,
+            rationale=rationale,
         )

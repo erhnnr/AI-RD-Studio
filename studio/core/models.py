@@ -20,6 +20,9 @@ class Opportunity:
     urgency: int
     feasibility: int
     strategic_fit: int
+    evidence_state: Optional[str] = None
+    evidence_confidence: Optional[float] = None
+    rationale: Optional[str] = None
 
     @property
     def score(self) -> int:
