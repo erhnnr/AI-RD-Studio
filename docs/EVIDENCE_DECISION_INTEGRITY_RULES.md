@@ -1,14 +1,4 @@
-Tamam. Şimdi **RULES** belgesini sabitleyelim.
 
-Aç:
-
-```powershell
-code docs\EVIDENCE_DECISION_INTEGRITY_RULES.md
-```
-
-Dosyanın tamamı şu olsun:
-
-````markdown
 # Evidence & Decision Integrity Cycle Rules
 
 Version: 0.1

@@ -1,16 +1,4 @@
-Tamam. O zaman doğru mimariyi sabitliyoruz: **evidence kararın tek nedeni olmayacak; gerçek bir karar kapısı olacak.**
 
-Sıradaki doğal adım **ADR-006 — Evidence-Aware Review Decision**.
-
-Aç:
-
-```powershell
-code docs\decisions\ADR\ADR-006-Evidence-Aware-Review-Decision.md
-```
-
-Dosyanın tamamı şu olsun:
-
-````markdown
 # ADR-006 — Evidence-Aware Review Decision
 
 Status: Accepted

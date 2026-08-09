@@ -1,16 +1,4 @@
-Tamam. Şimdi **Phase 6 kapanış belgesini** oluşturuyoruz. Bu belge aynı anda Trust Boundary Review + Stabilization Review + Exit Checklist olacak. Yeni özellik yok.
 
-Roadmap Phase 6 kapanışı için persistent trace, security trust boundaries, dokümantasyon senkronizasyonu, software/semantic testler ve final architecture review istiyor.  Ayrıca Phase 6 sonrasında açıkça `STOP` ve yeni external review şartı var. 
-
-Aç:
-
-```powershell
-code docs\PHASE_6_STABILIZATION_REVIEW.md
-```
-
-Dosyanın tamamı:
-
-````markdown
 # Phase 6 Stabilization and Trust Boundary Review
 
 Version: 1.0  

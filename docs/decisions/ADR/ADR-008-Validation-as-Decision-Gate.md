@@ -1,28 +1,4 @@
-Tamam. Phase 4’ü açıyoruz: **Validation as a Real Decision Gate**.
 
-Burada en kritik değişiklik şu olacak:
-
-```text
-Bugün:
-ValidationResult.valid = False
-ama pipeline yine ReviewBoard'a gidip ACCEPT üretebilir.
-
-Phase 4 sonunda:
-Validation FAIL
-→ ACCEPT mümkün değil.
-```
-
-Bu artık sadece validation mantığı değil, **runtime control-flow authority** meselesi. O yüzden ilk adım ADR.
-
-Aç:
-
-```powershell
-code docs\decisions\ADR\ADR-008-Validation-as-Decision-Gate.md
-```
-
-Dosyanın tamamı şu olsun:
-
-````markdown
 # ADR-008 — Validation as a Decision Gate
 
 Status: Accepted

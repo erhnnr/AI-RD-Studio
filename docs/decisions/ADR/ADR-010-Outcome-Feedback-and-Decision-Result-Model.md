@@ -1,34 +1,3 @@
-Tamam. Phase 6’yı açıyoruz: **Outcome Feedback + Stabilization**.
-
-Buradaki amaç, karar zincirini ilk kez gerçek gözlemle kapatmak:
-
-```text
-Signal
-↓
-Evidence
-↓
-Decision
-↓
-Experiment
-↓
-Observed Outcome
-↓
-Expected vs Actual
-↓
-Recorded Result
-```
-
-Önemli sınır: Bunu “self-learning” diye adlandırmayacağız. Phase 6’da sistem önce sadece **outcome’u yapılandırılmış biçimde kaydedecek ve kararla ilişkilendirecek**.
-
-İlk adım ADR.
-
-```powershell
-code docs\decisions\ADR\ADR-010-Outcome-Feedback-and-Decision-Result-Model.md
-```
-
-Dosyanın tamamını bununla değiştir:
-
-````markdown
 # ADR-010 — Outcome Feedback and Decision Result Model
 
 Status: Accepted

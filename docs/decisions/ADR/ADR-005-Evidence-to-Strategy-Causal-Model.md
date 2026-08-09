@@ -1,14 +1,4 @@
-Tamam. Sıradaki adım **ADR-005 — Evidence-to-Strategy Causal Model**.
 
-Aç:
-
-```powershell
-code docs\decisions\ADR\ADR-005-Evidence-to-Strategy-Causal-Model.md
-```
-
-Dosyanın tamamı şu olsun:
-
-````markdown
 # ADR-005 — Evidence-to-Strategy Causal Model
 
 Status: Accepted

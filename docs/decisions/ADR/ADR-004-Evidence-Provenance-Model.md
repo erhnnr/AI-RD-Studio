@@ -1,16 +1,4 @@
-Tamam. Phase 1’i resmi olarak başlatıyoruz.
 
-Önce ADR-004’ü yazalım.
-
-Aç:
-
-```powershell
-code docs\decisions\ADR\ADR-004-Evidence-Provenance-Model.md
-```
-
-Dosyanın tamamı şu olsun:
-
-````markdown
 # ADR-004 — Evidence & Provenance Model
 
 Status: Accepted

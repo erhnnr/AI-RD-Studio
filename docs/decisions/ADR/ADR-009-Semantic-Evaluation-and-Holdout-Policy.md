@@ -1,18 +1,4 @@
-Tamam. Phase 5’i açıyoruz: **Semantic Evaluation Suite**.
 
-Buradaki amaç artık “kod çalışıyor mu?” değil:
-
-> **Aynı anlamı taşıyan ama farklı şekilde sunulan girdilerde sistem tutarlı mı; gerçekten ilgili evidence değiştiğinde karar değişiyor mu; irrelevant wording sistemi yanıltıyor mu?**
-
-İlk adım yine ADR. Aç:
-
-```powershell
-code docs\decisions\ADR\ADR-009-Semantic-Evaluation-and-Holdout-Policy.md
-```
-
-Dosyanın tamamını bununla değiştir:
-
-````markdown
 # ADR-009 — Semantic Evaluation and Holdout Policy
 
 Status: Accepted
