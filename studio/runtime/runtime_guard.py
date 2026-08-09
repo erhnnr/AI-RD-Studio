@@ -1,3 +1,4 @@
+from studio.core.evidence import Claim, Evidence, EvidenceSource
 from studio.core.models import (
     KnowledgeRecord,
     Opportunity,
@@ -63,6 +64,81 @@ class RuntimeGuard:
         if result.signal is None:
             raise RuntimeValidationError(
                 "ResearchResult must contain a Signal."
+            )
+
+        if not isinstance(result.claims, list):
+            raise RuntimeValidationError(
+                "ResearchResult.claims must be a list."
+            )
+
+        for claim in result.claims:
+            RuntimeGuard._validate_claim(claim)
+
+    @staticmethod
+    def _validate_claim(claim: Claim) -> None:
+
+        if not isinstance(claim, Claim):
+            raise RuntimeValidationError(
+                "ResearchResult.claims must contain Claim objects."
+            )
+
+        if not claim.statement:
+            raise RuntimeValidationError(
+                "Claim must contain a statement."
+            )
+
+        if not 0.0 <= claim.confidence <= 1.0:
+            raise RuntimeValidationError(
+                "Claim confidence must be between 0.0 and 1.0."
+            )
+
+        if not isinstance(claim.supporting_evidence, list):
+            raise RuntimeValidationError(
+                "Claim.supporting_evidence must be a list."
+            )
+
+        if not isinstance(claim.counter_evidence, list):
+            raise RuntimeValidationError(
+                "Claim.counter_evidence must be a list."
+            )
+
+        for evidence in claim.supporting_evidence:
+            RuntimeGuard._validate_evidence(evidence)
+
+        for evidence in claim.counter_evidence:
+            RuntimeGuard._validate_evidence(evidence)
+
+    @staticmethod
+    def _validate_evidence(evidence: Evidence) -> None:
+
+        if not isinstance(evidence, Evidence):
+            raise RuntimeValidationError(
+                "Claim evidence entries must be Evidence objects."
+            )
+
+        if not evidence.content:
+            raise RuntimeValidationError(
+                "Evidence must contain content."
+            )
+
+        if not isinstance(evidence.source, EvidenceSource):
+            raise RuntimeValidationError(
+                "Evidence must contain an EvidenceSource."
+            )
+
+        if not evidence.source.name:
+            raise RuntimeValidationError(
+                "EvidenceSource must contain a name."
+            )
+
+        if not evidence.source.source_type:
+            raise RuntimeValidationError(
+                "EvidenceSource must contain a source_type."
+            )
+
+        if not 0.0 <= evidence.confidence <= 1.0:
+            raise RuntimeValidationError(
+                "Evidence confidence must be between 0.0 and 1.0."
             )
 
     @staticmethod
